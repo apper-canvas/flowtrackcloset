@@ -119,10 +119,10 @@ useEffect(() => {
             onChange={(e) => handleChange("projectId", e.target.value)}
             className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-surface-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="">Select a project</option>
+<option value="">Select a project</option>
             {projects.map((project) => (
               <option key={project.Id} value={project.Id}>
-                {project.name}
+                {project.Name}
               </option>
             ))}
           </select>
