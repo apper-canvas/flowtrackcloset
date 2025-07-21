@@ -30,19 +30,26 @@ const ClientDetail = () => {
     loadClientData();
   }, [id]);
 
-  const loadClientData = async () => {
+const loadClientData = async () => {
     try {
       setLoading(true);
       setError("");
 
+      // Validate client ID parameter
+      const clientId = parseInt(id);
+      if (!id || isNaN(clientId) || clientId <= 0) {
+        setError("Invalid client ID. Please check the URL and try again.");
+        return;
+      }
+
       const [clientData, projectsData, invoicesData] = await Promise.all([
-        clientService.getById(parseInt(id)),
-        projectService.getByClientId(parseInt(id)),
+        clientService.getById(clientId),
+        projectService.getByClientId(clientId),
         invoiceService.getAll()
       ]);
 
       if (!clientData) {
-        setError("Client not found");
+        setError("Client not found. The client may have been deleted or the ID is incorrect.");
         return;
       }
 
@@ -50,7 +57,12 @@ const ClientDetail = () => {
       setProjects(projectsData);
       setInvoices(invoicesData);
     } catch (err) {
-      setError("Failed to load client details. Please try again.");
+      console.error("Error loading client data:", err);
+      if (err.message && err.message.includes("does not exist")) {
+        setError("Client not found. Please verify the client ID and try again.");
+      } else {
+        setError("Failed to load client details. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

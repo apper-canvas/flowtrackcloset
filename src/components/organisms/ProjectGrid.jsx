@@ -94,7 +94,20 @@ const ProjectGrid = () => {
   };
 
 const getClientName = (clientId) => {
-    const client = clients.find(c => c.Id === (clientId?.Id || clientId));
+    // Handle null, undefined, or invalid client IDs
+    if (!clientId && clientId !== 0) {
+      return "Unknown Client";
+    }
+    
+    // Extract the actual ID value from lookup object or use direct value
+    const actualId = clientId?.Id || clientId;
+    
+    // Validate the ID is a valid number
+    if (!actualId && actualId !== 0) {
+      return "Unknown Client";
+    }
+    
+    const client = clients.find(c => c.Id === actualId);
     return client ? client.Name : "Unknown Client";
   };
 
