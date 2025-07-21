@@ -23,10 +23,9 @@ const TaskList = ({ projectId = null }) => {
   const [viewMode, setViewMode] = useState('kanban') // 'kanban' or 'list'
   const [timerStates, setTimerStates] = useState({}) // { taskId: { isActive, startTime, elapsedTime } }
   const [activeTimers, setActiveTimers] = useState(new Set())
-  const columns = {
+const columns = {
     'Pending': { title: 'To Do', color: 'bg-gray-100 dark:bg-gray-800' },
     'In Progress': { title: 'In Progress', color: 'bg-blue-100 dark:bg-blue-900/20' },
-    'Review': { title: 'Review', color: 'bg-yellow-100 dark:bg-yellow-900/20' },
     'Completed': { title: 'Completed', color: 'bg-green-100 dark:bg-green-900/20' }
   }
 
