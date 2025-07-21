@@ -147,10 +147,10 @@ if (!project) return { progress: 0, daysLeft: 0, isOverdue: false };
        remaining: Math.round(remaining),
        percentageSpent: Math.round(percentageSpent)
      };
- };
+};
 
   const calculateTotalTime = (timeEntries) => {
-    return timeEntries.reduce((total, entry) => total + entry.duration, 0);
+    return timeEntries.reduce((total, entry) => total + (entry.duration_c || 0), 0);
   };
 
   const formatTotalTime = (seconds) => {
