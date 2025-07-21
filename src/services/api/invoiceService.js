@@ -11,10 +11,11 @@ export const invoiceService = {
   getAll: async () => {
     try {
       const params = {
-        fields: [
+fields: [
           { field: { Name: "Name" } },
           { field: { Name: "projectId_c" } },
           { field: { Name: "invoiceNumber_c" } },
+          { field: { Name: "invoiceTitle_c" } },
           { field: { Name: "amount_c" } },
           { field: { Name: "status_c" } },
           { field: { Name: "dueDate_c" } },
@@ -47,10 +48,11 @@ export const invoiceService = {
   getById: async (id) => {
     try {
       const params = {
-        fields: [
+fields: [
           { field: { Name: "Name" } },
           { field: { Name: "projectId_c" } },
           { field: { Name: "invoiceNumber_c" } },
+          { field: { Name: "invoiceTitle_c" } },
           { field: { Name: "amount_c" } },
           { field: { Name: "status_c" } },
           { field: { Name: "dueDate_c" } },
@@ -80,10 +82,11 @@ export const invoiceService = {
   getByProjectId: async (projectId) => {
     try {
       const params = {
-        fields: [
+fields: [
           { field: { Name: "Name" } },
           { field: { Name: "projectId_c" } },
           { field: { Name: "invoiceNumber_c" } },
+          { field: { Name: "invoiceTitle_c" } },
           { field: { Name: "amount_c" } },
           { field: { Name: "status_c" } },
           { field: { Name: "dueDate_c" } },
@@ -122,11 +125,12 @@ export const invoiceService = {
       const currentYear = new Date().getFullYear();
       const invoiceNumber = `INV-${currentYear}-${Date.now().toString().slice(-6)}`;
       
-      const params = {
+const params = {
         records: [{
           Name: invoiceNumber,
           projectId_c: parseInt(invoiceData.projectId),
           invoiceNumber_c: invoiceNumber,
+          invoiceTitle_c: invoiceData.invoiceTitle || "",
           amount_c: invoiceData.amount,
           status_c: "Draft",
           dueDate_c: invoiceData.dueDate,
@@ -172,10 +176,11 @@ export const invoiceService = {
 
 update: async (id, invoiceData) => {
     try {
-      const params = {
+const params = {
         records: [{
           Id: parseInt(id),
           projectId_c: parseInt(invoiceData.projectId),
+          invoiceTitle_c: invoiceData.invoiceTitle || "",
           amount_c: invoiceData.amount,
           status_c: invoiceData.status,
           dueDate_c: invoiceData.dueDate,
