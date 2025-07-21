@@ -146,15 +146,15 @@ const InvoiceTable = () => {
     }
   };
 
-  const calculateOutstandingAmount = () => {
+const calculateOutstandingAmount = () => {
     return invoices
-      .filter(invoice => invoice.status !== "Paid")
-      .reduce((total, invoice) => total + invoice.amount, 0);
+      .filter(invoice => invoice.status_c !== "Paid")
+      .reduce((total, invoice) => total + (invoice.amount_c || 0), 0);
   };
 
-  const getProjectName = (projectId) => {
-    const project = projects.find(p => p.Id === projectId);
-    return project ? project.name : "Unknown Project";
+const getProjectName = (projectId) => {
+    const project = projects.find(p => p.Id === (projectId?.Id || projectId));
+    return project ? project.Name : "Unknown Project";
   };
   const getStatusVariant = (status) => {
     switch (status) {
@@ -170,9 +170,9 @@ const InvoiceTable = () => {
         return "secondary";
     }
   };
-  const filteredInvoices = invoices.filter(invoice =>
-    invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getProjectName(invoice.projectId).toLowerCase().includes(searchTerm.toLowerCase())
+const filteredInvoices = invoices.filter(invoice =>
+    invoice.invoiceNumber_c?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    getProjectName(invoice.projectId_c).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -263,31 +263,31 @@ if (error) {
                       <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center">
                         <ApperIcon name="FileText" className="w-4 h-4 text-primary-600" />
                       </div>
-                      <div className="ml-3">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {invoice.invoiceNumber}
-                        </div>
-                      </div>
+<div className="ml-3">
+                         <div className="text-sm font-medium text-gray-900 dark:text-white">
+                           {invoice.invoiceNumber_c}
+                         </div>
+                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">
-                      {getProjectName(invoice.projectId)}
+<td className="px-6 py-4 whitespace-nowrap">
+                     <div className="text-sm text-gray-900 dark:text-white">
+                       {getProjectName(invoice.projectId_c)}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-gradient">
-                      ${invoice.amount.toLocaleString()}
-                    </div>
+<td className="px-6 py-4 whitespace-nowrap">
+                     <div className="text-sm font-semibold text-gradient">
+                       ${invoice.amount_c?.toLocaleString()}
+                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Badge variant={getStatusVariant(invoice.status)}>
-                      {invoice.status}
-                    </Badge>
+<td className="px-6 py-4 whitespace-nowrap">
+                     <Badge variant={getStatusVariant(invoice.status_c)}>
+                       {invoice.status_c}
+                     </Badge>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {format(new Date(invoice.dueDate), "MMM dd, yyyy")}
-                  </td>
+<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                     {format(new Date(invoice.dueDate_c), "MMM dd, yyyy")}
+                   </td>
 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
                       <button 
@@ -304,26 +304,26 @@ if (error) {
                       >
                         <ApperIcon name="Edit" className="w-4 h-4" />
                       </button>
-                      {invoice.status === "Draft" && (
-                        <button 
-                          onClick={() => handleMarkAsSent(invoice.Id)}
-                          disabled={updatingStatus}
-                          className="text-blue-600 hover:text-blue-700 p-1 rounded disabled:opacity-50"
-                          title="Mark as Sent"
-                        >
-                          <ApperIcon name="Send" className="w-4 h-4" />
-                        </button>
-                      )}
-                      {(invoice.status === "Sent" || invoice.status === "Overdue") && (
-                        <button 
-                          onClick={() => handleMarkAsPaid(invoice.Id)}
-                          disabled={updatingStatus}
-                          className="text-green-600 hover:text-green-700 p-1 rounded disabled:opacity-50"
-                          title="Mark as Paid"
-                        >
-                          <ApperIcon name="DollarSign" className="w-4 h-4" />
-                        </button>
-                      )}
+{invoice.status_c === "Draft" && (
+                         <button 
+                           onClick={() => handleMarkAsSent(invoice.Id)}
+                           disabled={updatingStatus}
+                           className="text-blue-600 hover:text-blue-700 p-1 rounded disabled:opacity-50"
+                           title="Mark as Sent"
+                         >
+                           <ApperIcon name="Send" className="w-4 h-4" />
+                         </button>
+                       )}
+{(invoice.status_c === "Sent" || invoice.status_c === "Overdue") && (
+                         <button 
+                           onClick={() => handleMarkAsPaid(invoice.Id)}
+                           disabled={updatingStatus}
+                           className="text-green-600 hover:text-green-700 p-1 rounded disabled:opacity-50"
+                           title="Mark as Paid"
+                         >
+                           <ApperIcon name="DollarSign" className="w-4 h-4" />
+                         </button>
+                       )}
                       <button 
                         onClick={() => handleDownloadInvoice(invoice)}
                         className="text-green-600 hover:text-green-700 p-1 rounded"

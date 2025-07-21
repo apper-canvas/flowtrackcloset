@@ -6,11 +6,11 @@ import { clientService } from "@/services/api/clientService";
 import { toast } from "react-toastify";
 
 const ClientForm = ({ client, onSubmit, onCancel, loading: externalLoading = false }) => {
-  const [formData, setFormData] = useState({
-    name: client?.name || "",
-    email: client?.email || "",
-    company: client?.company || "",
-    phone: client?.phone || "",
+const [formData, setFormData] = useState({
+    name: client?.Name || "",
+    email: client?.email_c || "",
+    company: client?.company_c || "",
+    phone: client?.phone_c || "",
     notes: client?.notes || ""
   });
   const [loading, setLoading] = useState(false);

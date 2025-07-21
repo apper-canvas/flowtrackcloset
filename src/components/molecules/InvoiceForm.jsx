@@ -6,9 +6,9 @@ import Label from "@/components/atoms/Label";
 import Button from "@/components/atoms/Button";
 
 const InvoiceForm = ({ invoice, projects, onSubmit, onCancel, loading }) => {
-  const [formData, setFormData] = useState({
-    projectId: invoice?.projectId || "",
-    dueDate: invoice?.dueDate ? invoice.dueDate.split('T')[0] : "",
+const [formData, setFormData] = useState({
+    projectId: invoice?.projectId_c?.Id || invoice?.projectId_c || "",
+    dueDate: invoice?.dueDate_c ? invoice.dueDate_c.split('T')[0] : "",
     lineItems: invoice?.lineItems || [{ description: "", amount: "" }]
   });
   const [errors, setErrors] = useState({});

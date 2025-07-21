@@ -78,14 +78,14 @@ const handleAddClient = (newClient) => {
     }
   };
 
-  const getClientProjectCount = (clientId) => {
-    return projects.filter(p => p.clientId === clientId).length;
+const getClientProjectCount = (clientId) => {
+    return projects.filter(p => (p.clientId_c?.Id || p.clientId_c) === clientId).length;
   };
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchTerm.toLowerCase())
+const filteredClients = clients.filter(client =>
+    client.Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.company_c?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email_c?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -161,36 +161,36 @@ onAction={() => setShowAddModal(true)}
                   className="hover:bg-gray-50 dark:hover:bg-surface-700/30 transition-colors duration-200"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-medium">
-                        {client.name.charAt(0)}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {client.name}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {client.email}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">
-                      {client.company}
-                    </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {client.phone}
-                    </div>
-                  </td>
+<div className="flex items-center">
+                       <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-medium">
+                         {client.Name?.charAt(0)}
+                       </div>
+                       <div className="ml-4">
+                         <div className="text-sm font-medium text-gray-900 dark:text-white">
+                           {client.Name}
+                         </div>
+                         <div className="text-sm text-gray-500 dark:text-gray-400">
+                           {client.email_c}
+                         </div>
+                       </div>
+                     </div>
+                   </td>
+<td className="px-6 py-4 whitespace-nowrap">
+                     <div className="text-sm text-gray-900 dark:text-white">
+                       {client.company_c}
+                     </div>
+                     <div className="text-sm text-gray-500 dark:text-gray-400">
+                       {client.phone_c}
+                     </div>
+                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Badge variant="primary">
                       {getClientProjectCount(client.Id)} projects
                     </Badge>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {format(new Date(client.createdAt), "MMM dd, yyyy")}
-                  </td>
+<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                     {format(new Date(client.createdAt_c), "MMM dd, yyyy")}
+                   </td>
 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
                       <button 

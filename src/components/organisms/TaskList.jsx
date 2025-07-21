@@ -67,9 +67,9 @@ useEffect(() => {
     try {
       setLoading(true)
       setError('')
-      const data = projectId ? 
-        await taskService.getByProjectId(projectId) : 
-        await taskService.getAll()
+const data = projectId ? 
+         await taskService.getByProjectId(projectId) : 
+         await taskService.getAll()
       setTasks(data)
     } catch (err) {
       setError('Failed to load tasks')
@@ -153,15 +153,15 @@ useEffect(() => {
     const duration = Math.floor((endTime - timerState.startTime) / 1000) // duration in seconds
 
     try {
-      // Create time entry
-      const task = tasks.find(t => t.Id === taskId)
-      await timeEntryService.create({
-        taskId,
-        projectId: task?.projectId,
-        startTime: new Date(timerState.startTime).toISOString(),
-        endTime: new Date(endTime).toISOString(),
-        duration
-      })
+// Create time entry
+       const task = tasks.find(t => t.Id === taskId)
+       await timeEntryService.create({
+         taskId,
+         projectId: task?.projectId_c?.Id || task?.projectId_c,
+         startTime: new Date(timerState.startTime).toISOString(),
+         endTime: new Date(endTime).toISOString(),
+         duration
+       })
 
       // Update timer state
       setTimerStates(prev => {
@@ -297,9 +297,9 @@ const handleSaveTask = async (taskData) => {
         >
           <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow bg-white dark:bg-gray-800">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                {task.title}
-              </h3>
+<h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                 {task.title_c || task.Name}
+               </h3>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   variant="ghost"
@@ -331,11 +331,11 @@ const handleSaveTask = async (taskData) => {
               </p>
             )}
             
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
-              <div className="flex items-center gap-1">
-                <ApperIcon name="Calendar" className="w-3 h-3" />
-                <span>{new Date(task.dueDate).toLocaleDateString()}</span>
-              </div>
+<div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+               <div className="flex items-center gap-1">
+                 <ApperIcon name="Calendar" className="w-3 h-3" />
+                 <span>{new Date(task.dueDate_c).toLocaleDateString()}</span>
+               </div>
 </div>
             
             {/* Timer Section */}
@@ -367,9 +367,9 @@ const handleSaveTask = async (taskData) => {
                   </span>
                 )}
               </div>
-              <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
-                {task.priority}
-              </Badge>
+<Badge className={`text-xs ${getPriorityColor(task.priority_c)}`}>
+                 {task.priority_c}
+               </Badge>
             </div>
           </Card>
         </div>
@@ -393,31 +393,31 @@ const handleSaveTask = async (taskData) => {
         <tbody>
           {tasks.map((task) => (
             <tr key={task.Id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-              <td className="py-4 px-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{task.title}</h3>
-                  {task.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-1">
-                      {task.description}
-                    </p>
-                  )}
+<td className="py-4 px-4">
+                 <div>
+                   <h3 className="font-semibold text-gray-900 dark:text-white">{task.title_c || task.Name}</h3>
+                   {task.description && (
+                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-1">
+                       {task.description}
+                     </p>
+                   )}
                 </div>
               </td>
-              <td className="py-4 px-4">
-                <Badge variant={task.status === 'Completed' ? 'success' : task.status === 'In Progress' ? 'info' : 'warning'}>
-                  {task.status === 'Pending' ? 'To Do' : task.status}
-                </Badge>
-              </td>
-              <td className="py-4 px-4">
-                <Badge className={getPriorityColor(task.priority)}>
-                  {task.priority}
-                </Badge>
-              </td>
-              <td className="py-4 px-4">
-                <span className="text-gray-600 dark:text-gray-400">
-                  {new Date(task.dueDate).toLocaleDateString()}
-                </span>
-</td>
+<td className="py-4 px-4">
+                 <Badge variant={task.status_c === 'Completed' ? 'success' : task.status_c === 'In Progress' ? 'info' : 'warning'}>
+                   {task.status_c === 'Pending' ? 'To Do' : task.status_c}
+                 </Badge>
+               </td>
+<td className="py-4 px-4">
+                 <Badge className={getPriorityColor(task.priority_c)}>
+                   {task.priority_c}
+                 </Badge>
+               </td>
+<td className="py-4 px-4">
+                 <span className="text-gray-600 dark:text-gray-400">
+                   {new Date(task.dueDate_c).toLocaleDateString()}
+                 </span>
+               </td>
               <td className="py-4 px-4">
                 <div className="flex items-center gap-2">
                   <Button
@@ -480,8 +480,8 @@ const handleSaveTask = async (taskData) => {
   const KanbanView = () => (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {Object.entries(columns).map(([columnId, column]) => {
-          const columnTasks = tasks.filter(task => task.status === columnId)
+{Object.entries(columns).map(([columnId, column]) => {
+           const columnTasks = tasks.filter(task => task.status_c === columnId)
           
           return (
             <div key={columnId} className="flex flex-col">

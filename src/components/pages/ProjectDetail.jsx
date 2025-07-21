@@ -46,7 +46,7 @@ const [project, setProject] = useState(null);
       }
 
 const [clientData, tasksData, timeEntriesData] = await Promise.all([
-        clientService.getById(projectData.clientId),
+        clientService.getById(projectData.clientId_c?.Id || projectData.clientId_c),
         taskService.getByProjectId(parseInt(id)),
         timeEntryService.getByProjectId(parseInt(id))
       ]);
@@ -113,42 +113,41 @@ const [clientData, tasksData, timeEntriesData] = await Promise.all([
   };
 
   const calculateProjectProgress = () => {
-    if (!project) return { progress: 0, daysLeft: 0, isOverdue: false };
-    
-    const startDate = new Date(project.startDate);
-    const endDate = new Date(project.endDate);
-    const currentDate = new Date();
-    
-    const totalDays = differenceInDays(endDate, startDate);
-    const daysElapsed = differenceInDays(currentDate, startDate);
-    const daysLeft = differenceInDays(endDate, currentDate);
-    
-    const progress = Math.min(Math.max((daysElapsed / totalDays) * 100, 0), 100);
-    const isOverdue = isAfter(currentDate, endDate);
-    
-    return { progress: Math.round(progress), daysLeft, isOverdue };
+if (!project) return { progress: 0, daysLeft: 0, isOverdue: false };
+     
+     const startDate = new Date(project.startDate_c);
+     const endDate = new Date(project.endDate_c);
+     const currentDate = new Date();
+     
+     const totalDays = differenceInDays(endDate, startDate);
+     const daysElapsed = differenceInDays(currentDate, startDate);
+     const daysLeft = differenceInDays(endDate, currentDate);
+     
+     const progress = Math.min(Math.max((daysElapsed / totalDays) * 100, 0), 100);
+     const isOverdue = isAfter(currentDate, endDate);
+     
+     return { progress: Math.round(progress), daysLeft, isOverdue };
   };
 
   const calculateBudgetAnalysis = () => {
     if (!project) return { spent: 0, remaining: 0, percentageSpent: 0 };
-    
-    // Simulate actual spending based on project progress and tasks
-    const completedTasks = tasks.filter(task => task.status === "Completed").length;
-    const totalTasks = tasks.length || 1;
-    const taskProgress = (completedTasks / totalTasks) * 100;
-    
-    // Estimate spent amount based on task completion (with some variance)
-    const estimatedSpent = (project.budget * taskProgress / 100) * (0.8 + Math.random() * 0.4);
-    const spent = Math.min(estimatedSpent, project.budget);
-    const remaining = project.budget - spent;
-    const percentageSpent = (spent / project.budget) * 100;
-    
-    return {
-      spent: Math.round(spent),
-      remaining: Math.round(remaining),
-      percentageSpent: Math.round(percentageSpent)
-    };
-};
+// Simulate actual spending based on project progress and tasks
+     const completedTasks = tasks.filter(task => task.status_c === "Completed").length;
+     const totalTasks = tasks.length || 1;
+     const taskProgress = (completedTasks / totalTasks) * 100;
+     
+     // Estimate spent amount based on task completion (with some variance)
+     const estimatedSpent = (project.budget_c * taskProgress / 100) * (0.8 + Math.random() * 0.4);
+     const spent = Math.min(estimatedSpent, project.budget_c);
+     const remaining = project.budget_c - spent;
+     const percentageSpent = (spent / project.budget_c) * 100;
+     
+     return {
+       spent: Math.round(spent),
+       remaining: Math.round(remaining),
+       percentageSpent: Math.round(percentageSpent)
+     };
+ };
 
   const calculateTotalTime = (timeEntries) => {
     return timeEntries.reduce((total, entry) => total + entry.duration, 0);
@@ -192,18 +191,18 @@ const [clientData, tasksData, timeEntriesData] = await Promise.all([
             <ApperIcon name="ArrowLeft" className="w-4 h-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {project.name}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {client ? `Client: ${client.name}` : "Loading client..."}
-            </p>
+<h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+               {project.Name}
+             </h1>
+             <p className="text-gray-600 dark:text-gray-400">
+               {client ? `Client: ${client.Name}` : "Loading client..."}
+             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge variant={getStatusVariant(project.status)}>
-            {project.status}
-          </Badge>
+<Badge variant={getStatusVariant(project.status_c)}>
+             {project.status_c}
+           </Badge>
           <Button
             variant="primary"
             onClick={() => setShowEditModal(true)}
@@ -227,9 +226,9 @@ const [clientData, tasksData, timeEntriesData] = await Promise.all([
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Budget
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  ${project.budget.toLocaleString()}
-                </p>
+<p className="text-2xl font-bold text-gray-900 dark:text-white">
+                   ${project.budget_c?.toLocaleString()}
+                 </p>
               </div>
               <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center">
                 <ApperIcon name="DollarSign" className="w-6 h-6 text-white" />
@@ -344,26 +343,26 @@ const [clientData, tasksData, timeEntriesData] = await Promise.all([
                 <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                   Description
                 </h3>
-                <p className="text-gray-900 dark:text-white">
-                  {project.description || "No description provided"}
-                </p>
+<p className="text-gray-900 dark:text-white">
+                   {project.description_c || "No description provided"}
+                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                     Start Date
                   </h3>
-                  <p className="text-gray-900 dark:text-white">
-                    {format(new Date(project.startDate), "MMM dd, yyyy")}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                    End Date
-                  </h3>
-                  <p className="text-gray-900 dark:text-white">
-                    {format(new Date(project.endDate), "MMM dd, yyyy")}
-                  </p>
+<p className="text-gray-900 dark:text-white">
+                     {format(new Date(project.startDate_c), "MMM dd, yyyy")}
+                   </p>
+                 </div>
+                 <div>
+                   <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                     End Date
+                   </h3>
+                   <p className="text-gray-900 dark:text-white">
+                     {format(new Date(project.endDate_c), "MMM dd, yyyy")}
+                   </p>
                 </div>
               </div>
               {client && (
@@ -372,13 +371,13 @@ const [clientData, tasksData, timeEntriesData] = await Promise.all([
                     Client
                   </h3>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm">
-                      {client.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-gray-900 dark:text-white font-medium">{client.name}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{client.company}</p>
-                    </div>
+<div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm">
+                       {client.Name?.charAt(0)}
+                     </div>
+                     <div>
+                       <p className="text-gray-900 dark:text-white font-medium">{client.Name}</p>
+                       <p className="text-sm text-gray-600 dark:text-gray-400">{client.company_c}</p>
+                     </div>
                   </div>
                 </div>
               )}
@@ -398,11 +397,11 @@ const [clientData, tasksData, timeEntriesData] = await Promise.all([
             </h2>
             <div className="space-y-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {format(new Date(project.startDate), "MMM dd")}
-                </span>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {format(new Date(project.endDate), "MMM dd, yyyy")}
+<span className="text-sm text-gray-600 dark:text-gray-400">
+                   {format(new Date(project.startDate_c), "MMM dd")}
+                 </span>
+                 <span className="text-sm text-gray-600 dark:text-gray-400">
+                   {format(new Date(project.endDate_c), "MMM dd, yyyy")}
                 </span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
@@ -431,20 +430,20 @@ const [clientData, tasksData, timeEntriesData] = await Promise.all([
                   <div className="flex items-center gap-3">
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
                     <span className="text-sm text-gray-900 dark:text-white">Project Started</span>
-                    <span className="text-xs text-gray-500">
-                      {format(new Date(project.startDate), "MMM dd")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${progress >= 50 ? "bg-blue-500" : "bg-gray-300"}`}></div>
-                    <span className="text-sm text-gray-900 dark:text-white">Mid-point</span>
-                    <span className="text-xs text-gray-500">50% Complete</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${progress >= 100 ? "bg-green-500" : "bg-gray-300"}`}></div>
-                    <span className="text-sm text-gray-900 dark:text-white">Project Completion</span>
-                    <span className="text-xs text-gray-500">
-                      {format(new Date(project.endDate), "MMM dd")}
+<span className="text-xs text-gray-500">
+                       {format(new Date(project.startDate_c), "MMM dd")}
+                     </span>
+                   </div>
+                   <div className="flex items-center gap-3">
+                     <div className={`w-3 h-3 rounded-full ${progress >= 50 ? "bg-blue-500" : "bg-gray-300"}`}></div>
+                     <span className="text-sm text-gray-900 dark:text-white">Mid-point</span>
+                     <span className="text-xs text-gray-500">50% Complete</span>
+                   </div>
+                   <div className="flex items-center gap-3">
+                     <div className={`w-3 h-3 rounded-full ${progress >= 100 ? "bg-green-500" : "bg-gray-300"}`}></div>
+                     <span className="text-sm text-gray-900 dark:text-white">Project Completion</span>
+                     <span className="text-xs text-gray-500">
+                       {format(new Date(project.endDate_c), "MMM dd")}
                     </span>
                   </div>
                 </div>
@@ -482,9 +481,9 @@ const [clientData, tasksData, timeEntriesData] = await Promise.all([
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                ${project.budget.toLocaleString()}
-              </div>
+<div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                 ${project.budget_c?.toLocaleString()}
+               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Total Budget
               </div>
@@ -498,9 +497,9 @@ const [clientData, tasksData, timeEntriesData] = await Promise.all([
               ></div>
             </div>
             <div className="flex justify-between items-center mt-2 text-xs text-gray-600 dark:text-gray-400">
-              <span>$0</span>
-              <span>{percentageSpent}% utilized</span>
-              <span>${project.budget.toLocaleString()}</span>
+<span>$0</span>
+               <span>{percentageSpent}% utilized</span>
+               <span>${project.budget_c?.toLocaleString()}</span>
             </div>
           </div>
         </Card>

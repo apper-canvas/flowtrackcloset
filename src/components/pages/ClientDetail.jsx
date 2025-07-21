@@ -68,15 +68,15 @@ const ClientDetail = () => {
   };
 
   const getClientStats = () => {
-    const totalProjects = projects.length;
-    const activeProjects = projects.filter(p => p.status === "In Progress").length;
+const totalProjects = projects.length;
+     const activeProjects = projects.filter(p => p.status_c === "In Progress").length;
     
     // Calculate total revenue from client's project invoices
-    const clientProjectIds = projects.map(p => p.Id);
-    const clientInvoices = invoices.filter(i => 
-      clientProjectIds.includes(i.projectId) && i.status === "Paid"
-    );
-    const totalRevenue = clientInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+const clientProjectIds = projects.map(p => p.Id);
+     const clientInvoices = invoices.filter(i => 
+       clientProjectIds.includes(i.projectId_c?.Id || i.projectId_c) && i.status_c === "Paid"
+     );
+     const totalRevenue = clientInvoices.reduce((sum, invoice) => sum + (invoice.amount_c || 0), 0);
 
     return { totalProjects, activeProjects, totalRevenue };
   };
@@ -121,10 +121,10 @@ const ClientDetail = () => {
             <ApperIcon name="ArrowLeft" className="w-4 h-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {client.name}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">{client.company}</p>
+<h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+               {client.Name}
+             </h1>
+             <p className="text-gray-600 dark:text-gray-400">{client.company_c}</p>
           </div>
         </div>
         <Button
@@ -217,34 +217,34 @@ const ClientDetail = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <div className="flex items-center mb-4">
-                <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-xl mr-4">
-                  {client.name.charAt(0)}
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    {client.name}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">{client.company}</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3">
+<div className="flex items-center mb-4">
+                 <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-xl mr-4">
+                   {client.Name?.charAt(0)}
+                 </div>
+                 <div>
+                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                     {client.Name}
+                   </h3>
+                   <p className="text-gray-600 dark:text-gray-400">{client.company_c}</p>
+                 </div>
+               </div>
+             </div>
+             <div className="space-y-3">
+               <div className="flex items-center">
+                 <ApperIcon name="Mail" className="w-4 h-4 text-gray-400 mr-3" />
+                 <span className="text-gray-600 dark:text-gray-400">{client.email_c}</span>
+               </div>
+{client.phone_c && (
+                 <div className="flex items-center">
+                   <ApperIcon name="Phone" className="w-4 h-4 text-gray-400 mr-3" />
+                   <span className="text-gray-600 dark:text-gray-400">{client.phone_c}</span>
+                 </div>
+               )}
               <div className="flex items-center">
-                <ApperIcon name="Mail" className="w-4 h-4 text-gray-400 mr-3" />
-                <span className="text-gray-600 dark:text-gray-400">{client.email}</span>
-              </div>
-              {client.phone && (
-                <div className="flex items-center">
-                  <ApperIcon name="Phone" className="w-4 h-4 text-gray-400 mr-3" />
-                  <span className="text-gray-600 dark:text-gray-400">{client.phone}</span>
-                </div>
-              )}
-              <div className="flex items-center">
-                <ApperIcon name="Calendar" className="w-4 h-4 text-gray-400 mr-3" />
-                <span className="text-gray-600 dark:text-gray-400">
-                  Client since {format(new Date(client.createdAt), "MMM dd, yyyy")}
-                </span>
+<ApperIcon name="Calendar" className="w-4 h-4 text-gray-400 mr-3" />
+                 <span className="text-gray-600 dark:text-gray-400">
+                   Client since {format(new Date(client.createdAt_c), "MMM dd, yyyy")}
+                 </span>
               </div>
             </div>
           </div>
@@ -288,20 +288,20 @@ const ClientDetail = () => {
                   className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-surface-700/30 transition-colors"
                 >
                   <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                        {project.name}
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                        <span>Budget: ${project.budget.toLocaleString()}</span>
-                        <span>Start: {format(new Date(project.startDate), "MMM dd, yyyy")}</span>
-                        <span>End: {format(new Date(project.endDate), "MMM dd, yyyy")}</span>
-                      </div>
-                    </div>
-                    <Badge variant={getStatusColor(project.status)}>
-                      {project.status}
-                    </Badge>
-                  </div>
+<div className="flex-1">
+                       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                         {project.Name}
+                       </h3>
+                       <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                         <span>Budget: ${project.budget_c?.toLocaleString()}</span>
+                         <span>Start: {format(new Date(project.startDate_c), "MMM dd, yyyy")}</span>
+                         <span>End: {format(new Date(project.endDate_c), "MMM dd, yyyy")}</span>
+                       </div>
+                     </div>
+                     <Badge variant={getStatusColor(project.status_c)}>
+                       {project.status_c}
+                     </Badge>
+                   </div>
                 </motion.div>
               ))}
             </div>

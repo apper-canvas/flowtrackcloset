@@ -4,23 +4,22 @@ import Input from "@/components/atoms/Input";
 import Label from "@/components/atoms/Label";
 
 const ProjectForm = ({ project, clients = [], onSubmit, onCancel, loading: externalLoading = false }) => {
-  const [formData, setFormData] = useState({
-    name: project?.name || "",
-    description: project?.description || "",
-    clientId: project?.clientId || "",
-    status: project?.status || "planning",
-    startDate: project?.startDate ? project.startDate.split('T')[0] : "",
-    endDate: project?.endDate ? project.endDate.split('T')[0] : "",
-    budget: project?.budget || ""
+const [formData, setFormData] = useState({
+    name: project?.Name || "",
+    description: project?.description_c || "",
+    clientId: project?.clientId_c?.Id || project?.clientId_c || "",
+    status: project?.status_c || "Planning",
+    startDate: project?.startDate_c ? project.startDate_c.split('T')[0] : "",
+    endDate: project?.endDate_c ? project.endDate_c.split('T')[0] : "",
+    budget: project?.budget_c || ""
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const statusOptions = [
-    { value: "planning", label: "Planning" },
-    { value: "active", label: "Active" },
-    { value: "on-hold", label: "On Hold" },
-    { value: "completed", label: "Completed" }
+const statusOptions = [
+    { value: "Planning", label: "Planning" },
+    { value: "In Progress", label: "In Progress" },
+    { value: "Completed", label: "Completed" }
   ];
 
   const validateForm = () => {

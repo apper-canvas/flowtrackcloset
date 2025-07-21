@@ -1,8 +1,44 @@
-import React from "react";
+import React, { useContext } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ApperIcon from "@/components/ApperIcon";
 import ThemeToggle from "@/components/molecules/ThemeToggle";
 import Button from "@/components/atoms/Button";
+import { AuthContext } from "@/App";
+
+const UserProfile = () => {
+  const { logout } = useContext(AuthContext);
+  const { user, isAuthenticated } = useSelector((state) => state.user);
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
+
+  return (
+    <div className="hidden sm:flex items-center space-x-3">
+      <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center">
+        <ApperIcon name="User" className="w-4 h-4 text-white" />
+      </div>
+      <div className="hidden md:block">
+        <p className="text-sm font-medium text-gray-900 dark:text-white">
+          {user.firstName} {user.lastName}
+        </p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          {user.emailAddress}
+        </p>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={logout}
+        className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+        title="Logout"
+      >
+        <ApperIcon name="LogOut" className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+};
 
 const Header = ({ onMenuToggle, title = "Dashboard", onNewProject }) => {
   const navigate = useNavigate();
@@ -33,6 +69,28 @@ const Header = ({ onMenuToggle, title = "Dashboard", onNewProject }) => {
               </h1>
             </div>
           </div>
+          <div className="flex items-center space-x-4">
+            <ThemeToggle />
+            
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onNewProject}
+              className="hidden sm:flex items-center space-x-2"
+            >
+              <ApperIcon name="Plus" className="w-4 h-4" />
+              <span>New Project</span>
+            </Button>
+            
+            <UserProfile />
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
 <div className="flex items-center space-x-4">
             <ThemeToggle />
             
@@ -46,24 +104,5 @@ const Header = ({ onMenuToggle, title = "Dashboard", onNewProject }) => {
               <span>New Project</span>
             </Button>
             
-            <div className="hidden sm:flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center">
-                <ApperIcon name="User" className="w-4 h-4 text-white" />
-              </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Freelancer
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Project Manager
-                </p>
-              </div>
-            </div>
+            <UserProfile />
           </div>
-        </div>
-      </div>
-    </header>
-  );
-};
-
-export default Header;

@@ -27,10 +27,10 @@ const DashboardStats = () => {
           invoiceService.getAll()
         ]);
 
-        const activeProjects = projects.filter(p => p.status === "In Progress").length;
-        const pendingTasks = tasks.filter(t => t.status === "Pending" || t.status === "In Progress").length;
-        const paidInvoices = invoices.filter(i => i.status === "Paid");
-        const totalRevenue = paidInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+const activeProjects = projects.filter(p => p.status_c === "In Progress").length;
+         const pendingTasks = tasks.filter(t => t.status_c === "Pending" || t.status_c === "In Progress").length;
+         const paidInvoices = invoices.filter(i => i.status_c === "Paid");
+         const totalRevenue = paidInvoices.reduce((sum, invoice) => sum + (invoice.amount_c || 0), 0);
 
         setStats({
           totalClients: clients.length,

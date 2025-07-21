@@ -16,15 +16,15 @@ const TaskForm = ({ task, projects = [], projectId = null, onSubmit, onCancel })
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     if (task) {
       setFormData({
-        title: task.title || "",
+        title: task.title_c || task.Name || "",
         description: task.description || "",
-        projectId: task.projectId || projectId || "",
-        priority: task.priority || "Medium",
-        dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-        status: task.status || "Pending"
+        projectId: task.projectId_c?.Id || task.projectId_c || projectId || "",
+        priority: task.priority_c || "Medium",
+        dueDate: task.dueDate_c ? format(new Date(task.dueDate_c), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+        status: task.status_c || "Pending"
       });
     }
   }, [task, projectId]);

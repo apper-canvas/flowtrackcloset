@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
-import ProjectForm from "@/components/molecules/ProjectForm";
 import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
 import Empty from "@/components/ui/Empty";
@@ -10,13 +9,13 @@ import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import Projects from "@/components/pages/Projects";
 import SearchBar from "@/components/molecules/SearchBar";
+import ProjectForm from "@/components/molecules/ProjectForm";
 import Card from "@/components/atoms/Card";
 import Modal from "@/components/atoms/Modal";
 import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import { clientService } from "@/services/api/clientService";
 import { projectService } from "@/services/api/projectService";
-
 const ProjectGrid = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
@@ -95,8 +94,8 @@ const ProjectGrid = () => {
   };
 
 const getClientName = (clientId) => {
-    const client = clients.find(c => c.Id === clientId);
-    return client ? client.name : "Unknown Client";
+    const client = clients.find(c => c.Id === (clientId?.Id || clientId));
+    return client ? client.Name : "Unknown Client";
   };
 
   const getStatusVariant = (status) => {
@@ -112,9 +111,9 @@ const getClientName = (clientId) => {
     }
   };
 
-  const filteredProjects = projects.filter(project =>
-    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getClientName(project.clientId).toLowerCase().includes(searchTerm.toLowerCase())
+const filteredProjects = projects.filter(project =>
+    project.Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    getClientName(project.clientId_c).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -170,36 +169,36 @@ return (
           >
             <Card variant="glass" className="p-6 hover:scale-105 transition-all duration-300">
               <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    {project.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Client: {getClientName(project.clientId)}
-                  </p>
-                </div>
-                <Badge variant={getStatusVariant(project.status)}>
-                  {project.status}
-                </Badge>
-              </div>
+<div className="flex-1">
+                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                     {project.Name}
+                   </h3>
+                   <p className="text-sm text-gray-600 dark:text-gray-400">
+                     Client: {getClientName(project.clientId_c)}
+                   </p>
+                 </div>
+                 <Badge variant={getStatusVariant(project.status_c)}>
+                   {project.status_c}
+                 </Badge>
+               </div>
 
-              <div className="space-y-3">
+<div className="space-y-3">
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <ApperIcon name="Calendar" className="w-4 h-4 mr-2" />
                   <span>
-                    {format(new Date(project.startDate), "MMM dd")} - {format(new Date(project.endDate), "MMM dd, yyyy")}
+                    {format(new Date(project.startDate_c), "MMM dd")} - {format(new Date(project.endDate_c), "MMM dd, yyyy")}
                   </span>
                 </div>
                 
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <ApperIcon name="DollarSign" className="w-4 h-4 mr-2" />
-                  <span className="font-semibold text-gradient">
-                    ${project.budget.toLocaleString()}
+                   <ApperIcon name="DollarSign" className="w-4 h-4 mr-2" />
+                   <span className="font-semibold text-gradient">
+${project.budget_c?.toLocaleString()}
                   </span>
                 </div>
               </div>
 
-<div className="mt-6 flex items-center justify-between">
+              <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <button 
                     onClick={() => handleViewProject(project)}
@@ -224,10 +223,10 @@ return (
                   </button>
                 </div>
                 
-                <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+<div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                   <ApperIcon name="Clock" className="w-3 h-3 mr-1" />
                   <span>
-                    {Math.ceil((new Date(project.endDate) - new Date()) / (1000 * 60 * 60 * 24))} days left
+                    {Math.ceil((new Date(project.endDate_c) - new Date()) / (1000 * 60 * 60 * 24))} days left
                   </span>
                 </div>
               </div>
