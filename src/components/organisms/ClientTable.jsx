@@ -1,22 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import Modal from "@/components/atoms/Modal";
+import ClientForm from "@/components/molecules/ClientForm";
 import ApperIcon from "@/components/ApperIcon";
+import Empty from "@/components/ui/Empty";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import Projects from "@/components/pages/Projects";
+import Clients from "@/components/pages/Clients";
+import SearchBar from "@/components/molecules/SearchBar";
 import Card from "@/components/atoms/Card";
 import Badge from "@/components/atoms/Badge";
-import SearchBar from "@/components/molecules/SearchBar";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
-import Empty from "@/components/ui/Empty";
+import Button from "@/components/atoms/Button";
 import { clientService } from "@/services/api/clientService";
 import { projectService } from "@/services/api/projectService";
-
 const ClientTable = () => {
   const [clients, setClients] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -39,6 +44,11 @@ const ClientTable = () => {
     } finally {
       setLoading(false);
     }
+};
+
+  const handleAddClient = (newClient) => {
+    setClients(prev => [...prev, newClient]);
+    setShowAddModal(false);
   };
 
   const getClientProjectCount = (clientId) => {
@@ -65,22 +75,30 @@ const ClientTable = () => {
         title="No clients yet"
         description="Start building your client base by adding your first client."
         actionText="Add Client"
-        onAction={() => console.log("Add client clicked")}
+onAction={() => setShowAddModal(true)}
       />
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Clients</h2>
-        <div className="w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <SearchBar
             value={searchTerm}
             onChange={setSearchTerm}
             placeholder="Search clients..."
             className="sm:w-80"
           />
+          <Button 
+            variant="primary" 
+            onClick={() => setShowAddModal(true)}
+            className="whitespace-nowrap"
+          >
+            <ApperIcon name="Plus" className="w-4 h-4 mr-2" />
+            Add Client
+          </Button>
         </div>
       </div>
 
@@ -174,6 +192,19 @@ const ClientTable = () => {
           onAction={() => setSearchTerm("")}
         />
       )}
+</div>
+
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Add New Client"
+        className="max-w-lg"
+      >
+        <ClientForm
+          onSubmit={handleAddClient}
+          onCancel={() => setShowAddModal(false)}
+        />
+      </Modal>
     </div>
   );
 };
