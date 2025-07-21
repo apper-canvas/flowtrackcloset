@@ -19,7 +19,7 @@ export const invoiceService = {
     return invoices.filter(i => i.projectId === parseInt(projectId)).map(i => ({ ...i }));
   },
 
-  create: async (invoiceData) => {
+create: async (invoiceData) => {
     await new Promise(resolve => setTimeout(resolve, 400));
     const newId = Math.max(...invoices.map(i => i.Id)) + 1;
     const currentYear = new Date().getFullYear();
@@ -27,7 +27,10 @@ export const invoiceService = {
     
     const newInvoice = {
       Id: newId,
-      ...invoiceData,
+      projectId: invoiceData.projectId,
+      amount: invoiceData.amount,
+      dueDate: invoiceData.dueDate,
+      lineItems: invoiceData.lineItems || [],
       invoiceNumber: `INV-${currentYear}-${invoiceCount.toString().padStart(3, "0")}`,
       status: "Draft"
     };

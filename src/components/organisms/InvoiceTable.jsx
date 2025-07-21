@@ -1,23 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { toast } from "react-toastify";
+import InvoiceForm from "@/components/molecules/InvoiceForm";
 import ApperIcon from "@/components/ApperIcon";
-import Card from "@/components/atoms/Card";
-import Badge from "@/components/atoms/Badge";
-import SearchBar from "@/components/molecules/SearchBar";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import Invoices from "@/components/pages/Invoices";
+import SearchBar from "@/components/molecules/SearchBar";
+import Card from "@/components/atoms/Card";
+import Modal from "@/components/atoms/Modal";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
 import { invoiceService } from "@/services/api/invoiceService";
 import { projectService } from "@/services/api/projectService";
-
 const InvoiceTable = () => {
   const [invoices, setInvoices] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
   useEffect(() => {
     loadData();
   }, []);
@@ -39,13 +44,26 @@ const InvoiceTable = () => {
     } finally {
       setLoading(false);
     }
+};
+
+  const handleCreateInvoice = async (invoiceData) => {
+    try {
+      setCreating(true);
+      const newInvoice = await invoiceService.create(invoiceData);
+      setInvoices(prev => [...prev, newInvoice]);
+      setShowCreateModal(false);
+      toast.success("Invoice created successfully");
+    } catch (err) {
+      toast.error("Failed to create invoice. Please try again.");
+    } finally {
+      setCreating(false);
+    }
   };
 
   const getProjectName = (projectId) => {
     const project = projects.find(p => p.Id === projectId);
     return project ? project.name : "Unknown Project";
   };
-
   const getStatusVariant = (status) => {
     switch (status) {
       case "Paid":
@@ -74,31 +92,38 @@ const InvoiceTable = () => {
     return <Error message={error} onRetry={loadData} />;
   }
 
-  if (invoices.length === 0) {
+if (invoices.length === 0) {
     return (
       <Empty 
         title="No invoices yet"
         description="Create invoices to bill your clients for completed work."
         actionText="Create Invoice"
-        onAction={() => console.log("Create invoice clicked")}
+        onAction={() => setShowCreateModal(true)}
       />
     );
   }
-
-  return (
+return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Invoices</h2>
-        <div className="w-full sm:w-auto">
-          <SearchBar
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search invoices..."
-            className="sm:w-80"
-          />
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            className="w-full sm:w-auto"
+          >
+            <ApperIcon name="Plus" className="w-4 h-4 mr-2" />
+            New Invoice
+          </Button>
+          <div className="w-full sm:w-auto">
+            <SearchBar
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search invoices..."
+              className="sm:w-80"
+            />
+          </div>
         </div>
       </div>
-
       <Card variant="glass" className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -191,9 +216,21 @@ const InvoiceTable = () => {
           title="No invoices found"
           description={`No invoices match "${searchTerm}". Try adjusting your search.`}
           actionText="Clear Search"
-          onAction={() => setSearchTerm("")}
+onAction={() => setSearchTerm("")}
         />
       )}
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Create New Invoice"
+      >
+        <InvoiceForm
+          projects={projects}
+          onSubmit={handleCreateInvoice}
+          onCancel={() => setShowCreateModal(false)}
+          loading={creating}
+        />
+      </Modal>
     </div>
   );
 };
