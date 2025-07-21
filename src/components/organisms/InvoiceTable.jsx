@@ -69,7 +69,7 @@ const InvoiceTable = () => {
     }
 };
 
-  const handleStatusUpdate = async (invoiceId, newStatus, paymentDate = null) => {
+const handleStatusUpdate = async (invoiceId, newStatus, paymentDate = null) => {
     try {
       setUpdatingStatus(true);
       const updateData = { status: newStatus };
@@ -78,11 +78,12 @@ const InvoiceTable = () => {
       }
       
       const updatedInvoice = await invoiceService.updateStatus(invoiceId, updateData);
-      setInvoices(prev => prev.map(invoice => 
-        invoice.Id === invoiceId ? updatedInvoice : invoice
-      ));
-      
-      toast.success(`Invoice marked as ${newStatus.toLowerCase()}`);
+      if (updatedInvoice) {
+        setInvoices(prev => prev.map(invoice => 
+          invoice.Id === invoiceId ? { ...invoice, ...updatedInvoice } : invoice
+        ));
+        toast.success(`Invoice marked as ${newStatus.toLowerCase()}`);
+      }
     } catch (err) {
       toast.error("Failed to update invoice status. Please try again.");
     } finally {
