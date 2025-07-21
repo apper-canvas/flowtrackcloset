@@ -511,7 +511,7 @@ if (!project) return { progress: 0, daysLeft: 0, isOverdue: false };
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.7 }}
       >
-        <KanbanBoard projectId={parseInt(id)} />
+<KanbanBoard projectId={parseInt(id)} key={`kanban-${id}-${tasks.length}`} />
       </motion.div>
 
       {/* Edit Modal */}

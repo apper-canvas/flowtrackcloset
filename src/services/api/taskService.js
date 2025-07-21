@@ -88,9 +88,9 @@ export const taskService = {
           { field: { Name: "Tags" } }
         ],
         where: [
-          {
+{
             FieldName: "projectId_c",
-            Operator: "EqualTo",
+            Operator: "EqualTo", 
             Values: [parseInt(projectId)]
           }
         ]
