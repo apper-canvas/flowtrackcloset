@@ -10,6 +10,7 @@ import ApperIcon from '@/components/ApperIcon'
 import Loading from '@/components/ui/Loading'
 import Error from '@/components/ui/Error'
 import { taskService } from '@/services/api/taskService'
+import { timeEntryService } from '@/services/api/timeEntryService'
 import { projectService } from '@/services/api/projectService'
 
 const TaskList = ({ projectId = null }) => {
@@ -20,6 +21,8 @@ const TaskList = ({ projectId = null }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [viewMode, setViewMode] = useState('kanban') // 'kanban' or 'list'
+  const [timerStates, setTimerStates] = useState({}) // { taskId: { isActive, startTime, elapsedTime } }
+  const [activeTimers, setActiveTimers] = useState(new Set())
   const columns = {
     'Pending': { title: 'To Do', color: 'bg-gray-100 dark:bg-gray-800' },
     'In Progress': { title: 'In Progress', color: 'bg-blue-100 dark:bg-blue-900/20' },
@@ -27,12 +30,38 @@ const TaskList = ({ projectId = null }) => {
     'Completed': { title: 'Completed', color: 'bg-green-100 dark:bg-green-900/20' }
   }
 
-  useEffect(() => {
+useEffect(() => {
     loadTasks()
     if (!projectId) {
       loadProjects()
     }
+    loadActiveTimers()
   }, [projectId])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimerStates(prevStates => {
+        const newStates = { ...prevStates }
+        let hasUpdates = false
+        
+        activeTimers.forEach(taskId => {
+          if (newStates[taskId]?.isActive) {
+            const now = Date.now()
+            const elapsed = now - newStates[taskId].startTime
+            newStates[taskId] = {
+              ...newStates[taskId],
+              elapsedTime: elapsed
+            }
+            hasUpdates = true
+          }
+        })
+        
+        return hasUpdates ? newStates : prevStates
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [activeTimers])
 
   const loadTasks = async () => {
     try {
@@ -57,6 +86,116 @@ const TaskList = ({ projectId = null }) => {
     } catch (err) {
       console.error('Failed to load projects:', err)
     }
+}
+
+  const loadActiveTimers = () => {
+    try {
+      const savedTimers = localStorage.getItem('activeTaskTimers')
+      if (savedTimers) {
+        const timers = JSON.parse(savedTimers)
+        const currentTime = Date.now()
+        const updatedTimers = {}
+        const activeSet = new Set()
+
+        Object.entries(timers).forEach(([taskId, timer]) => {
+          if (timer.isActive) {
+            const elapsed = currentTime - timer.startTime
+            updatedTimers[taskId] = {
+              ...timer,
+              elapsedTime: elapsed
+            }
+            activeSet.add(parseInt(taskId))
+          }
+        })
+
+        setTimerStates(updatedTimers)
+        setActiveTimers(activeSet)
+      }
+    } catch (error) {
+      console.error('Failed to load active timers:', error)
+    }
+  }
+
+  const saveActiveTimers = (timers) => {
+    try {
+      localStorage.setItem('activeTaskTimers', JSON.stringify(timers))
+    } catch (error) {
+      console.error('Failed to save active timers:', error)
+    }
+  }
+
+  const handleStartTimer = (taskId) => {
+    const startTime = Date.now()
+    const newTimerState = {
+      isActive: true,
+      startTime,
+      elapsedTime: 0
+    }
+
+    setTimerStates(prev => {
+      const updated = {
+        ...prev,
+        [taskId]: newTimerState
+      }
+      saveActiveTimers(updated)
+      return updated
+    })
+
+    setActiveTimers(prev => new Set([...prev, taskId]))
+    toast.info('Timer started')
+  }
+
+  const handleStopTimer = async (taskId) => {
+    const timerState = timerStates[taskId]
+    if (!timerState?.isActive) return
+
+    const endTime = Date.now()
+    const duration = Math.floor((endTime - timerState.startTime) / 1000) // duration in seconds
+
+    try {
+      // Create time entry
+      const task = tasks.find(t => t.Id === taskId)
+      await timeEntryService.create({
+        taskId,
+        projectId: task?.projectId,
+        startTime: new Date(timerState.startTime).toISOString(),
+        endTime: new Date(endTime).toISOString(),
+        duration
+      })
+
+      // Update timer state
+      setTimerStates(prev => {
+        const updated = { ...prev }
+        delete updated[taskId]
+        saveActiveTimers(updated)
+        return updated
+      })
+
+      setActiveTimers(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(taskId)
+        return newSet
+      })
+
+      const hours = Math.floor(duration / 3600)
+      const minutes = Math.floor((duration % 3600) / 60)
+      const timeString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+      toast.success(`Timer stopped. Time logged: ${timeString}`)
+    } catch (error) {
+      toast.error('Failed to log time entry')
+    }
+  }
+
+  const formatElapsedTime = (milliseconds) => {
+    const totalSeconds = Math.floor(milliseconds / 1000)
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+    }
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
   }
 const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
@@ -197,9 +336,37 @@ const handleSaveTask = async (taskData) => {
                 <ApperIcon name="Calendar" className="w-3 h-3" />
                 <span>{new Date(task.dueDate).toLocaleDateString()}</span>
               </div>
-            </div>
+</div>
             
-            <div className="flex justify-between items-center">
+            {/* Timer Section */}
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const isActive = timerStates[task.Id]?.isActive
+                    if (isActive) {
+                      handleStopTimer(task.Id)
+                    } else {
+                      handleStartTimer(task.Id)
+                    }
+                  }}
+                  className={`gap-1 ${timerStates[task.Id]?.isActive ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}`}
+                >
+                  <ApperIcon 
+                    name={timerStates[task.Id]?.isActive ? "Square" : "Play"} 
+                    className="w-3 h-3" 
+                  />
+                  {timerStates[task.Id]?.isActive ? 'Stop' : 'Start'}
+                </Button>
+                {timerStates[task.Id]?.isActive && (
+                  <span className="text-xs font-mono text-blue-600 dark:text-blue-400">
+                    {formatElapsedTime(timerStates[task.Id].elapsedTime)}
+                  </span>
+                )}
+              </div>
               <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
                 {task.priority}
               </Badge>
@@ -213,12 +380,13 @@ const handleSaveTask = async (taskData) => {
   const TableTaskList = () => (
     <div className="overflow-x-auto">
       <table className="w-full">
-        <thead>
+<thead>
           <tr className="border-b border-gray-200 dark:border-gray-700">
             <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Task</th>
             <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Status</th>
             <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Priority</th>
             <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Due Date</th>
+            <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Timer</th>
             <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Actions</th>
           </tr>
         </thead>
@@ -249,6 +417,33 @@ const handleSaveTask = async (taskData) => {
                 <span className="text-gray-600 dark:text-gray-400">
                   {new Date(task.dueDate).toLocaleDateString()}
                 </span>
+</td>
+              <td className="py-4 px-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const isActive = timerStates[task.Id]?.isActive
+                      if (isActive) {
+                        handleStopTimer(task.Id)
+                      } else {
+                        handleStartTimer(task.Id)
+                      }
+                    }}
+                    className={`gap-1 ${timerStates[task.Id]?.isActive ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}`}
+                  >
+                    <ApperIcon 
+                      name={timerStates[task.Id]?.isActive ? "Square" : "Play"} 
+                      className="w-3 h-3" 
+                    />
+                  </Button>
+                  {timerStates[task.Id]?.isActive && (
+                    <span className="text-xs font-mono text-blue-600 dark:text-blue-400">
+                      {formatElapsedTime(timerStates[task.Id].elapsedTime)}
+                    </span>
+                  )}
+                </div>
               </td>
               <td className="py-4 px-4">
                 <div className="flex gap-2">

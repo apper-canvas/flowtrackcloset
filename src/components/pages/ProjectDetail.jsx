@@ -17,12 +17,14 @@ import Button from "@/components/atoms/Button";
 import { taskService } from "@/services/api/taskService";
 import { clientService } from "@/services/api/clientService";
 import { projectService } from "@/services/api/projectService";
+import { timeEntryService } from "@/services/api/timeEntryService";
 export default function ProjectDetail() {
   const { id } = useParams()
   const navigate = useNavigate();
-  const [project, setProject] = useState(null);
+const [project, setProject] = useState(null);
   const [client, setClient] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [totalTime, setTotalTime] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
@@ -43,14 +45,16 @@ export default function ProjectDetail() {
         return;
       }
 
-      const [clientData, tasksData] = await Promise.all([
+const [clientData, tasksData, timeEntriesData] = await Promise.all([
         clientService.getById(projectData.clientId),
-        taskService.getByProjectId(parseInt(id))
+        taskService.getByProjectId(parseInt(id)),
+        timeEntryService.getByProjectId(parseInt(id))
       ]);
 
       setProject(projectData);
       setClient(clientData);
       setTasks(tasksData);
+      setTotalTime(calculateTotalTime(timeEntriesData));
     } catch (err) {
       setError("Failed to load project details. Please try again.");
     } finally {
@@ -144,6 +148,20 @@ export default function ProjectDetail() {
       remaining: Math.round(remaining),
       percentageSpent: Math.round(percentageSpent)
     };
+};
+
+  const calculateTotalTime = (timeEntries) => {
+    return timeEntries.reduce((total, entry) => total + entry.duration, 0);
+  };
+
+  const formatTotalTime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
   };
 
   if (loading) {
@@ -196,8 +214,8 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+{/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -280,6 +298,28 @@ export default function ProjectDetail() {
                 </p>
               </div>
               <div className={`w-12 h-12 rounded-full ${isOverdue ? "bg-red-500" : "bg-orange-500"} flex items-center justify-center`}>
+                <ApperIcon name="Clock" className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </Card>
+</motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.4 }}
+        >
+          <Card variant="glass" className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Total Time
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatTotalTime(totalTime)}
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center">
                 <ApperIcon name="Clock" className="w-6 h-6 text-white" />
               </div>
             </div>
