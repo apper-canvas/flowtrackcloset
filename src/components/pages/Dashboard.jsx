@@ -1,40 +1,154 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import ApperIcon from "@/components/ApperIcon";
 import Card from "@/components/atoms/Card";
+import Modal from "@/components/atoms/Modal";
+import ProjectForm from "@/components/molecules/ProjectForm";
+import ClientForm from "@/components/molecules/ClientForm";
+import TaskForm from "@/components/organisms/TaskForm";
+import InvoiceForm from "@/components/molecules/InvoiceForm";
 import DashboardStats from "@/components/organisms/DashboardStats";
-
-const Dashboard = () => {
+import clientService from "@/services/api/clientService";
+import projectService from "@/services/api/projectService";
+import taskService from "@/services/api/taskService";
+import invoiceService from "@/services/api/invoiceService";
+import { toast } from "react-toastify";
+const Dashboard = ({ onNewProject }) => {
   const navigate = useNavigate();
-const quickActions = [
-    {
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleOpenClientModal = () => {
+    setShowClientModal(true);
+  };
+
+  const handleCloseClientModal = () => {
+    setShowClientModal(false);
+  };
+
+  const handleClientSubmit = async (clientData) => {
+    try {
+      setLoading(true);
+      await clientService.create(clientData);
+      toast.success('Client created successfully!');
+      handleCloseClientModal();
+    } catch (error) {
+      console.error('Error creating client:', error);
+      toast.error('Failed to create client');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenTaskModal = async () => {
+    try {
+      setLoading(true);
+      const [clientsData, projectsData] = await Promise.all([
+        clientService.getAll(),
+        projectService.getAll()
+      ]);
+      setClients(clientsData);
+      setProjects(projectsData);
+      setShowTaskModal(true);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast.error('Failed to load required data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseTaskModal = () => {
+    setShowTaskModal(false);
+    setClients([]);
+    setProjects([]);
+  };
+
+  const handleTaskSubmit = async (taskData) => {
+    try {
+      setLoading(true);
+      await taskService.create(taskData);
+      toast.success('Task created successfully!');
+      handleCloseTaskModal();
+    } catch (error) {
+      console.error('Error creating task:', error);
+      toast.error('Failed to create task');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenInvoiceModal = async () => {
+    try {
+      setLoading(true);
+      const [clientsData, projectsData] = await Promise.all([
+        clientService.getAll(),
+        projectService.getAll()
+      ]);
+      setClients(clientsData);
+      setProjects(projectsData);
+      setShowInvoiceModal(true);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast.error('Failed to load required data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseInvoiceModal = () => {
+    setShowInvoiceModal(false);
+    setClients([]);
+    setProjects([]);
+  };
+
+  const handleInvoiceSubmit = async (invoiceData) => {
+    try {
+      setLoading(true);
+      await invoiceService.create(invoiceData);
+      toast.success('Invoice created successfully!');
+      handleCloseInvoiceModal();
+    } catch (error) {
+      console.error('Error creating invoice:', error);
+      toast.error('Failed to create invoice');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const quickActions = [
+{
       title: "New Client",
       description: "Add a new client to your portfolio",
       icon: "UserPlus",
       color: "primary",
-      action: () => navigate("/clients")
+      action: handleOpenClientModal
     },
     {
       title: "Create Project",
       description: "Start a new project for existing clients",
       icon: "FolderPlus",
       color: "info",
-      action: () => navigate("/projects")
+      action: onNewProject
     },
     {
       title: "Add Task",
       description: "Break down projects into manageable tasks",
       icon: "Plus",
       color: "warning",
-      action: () => navigate("/tasks")
+      action: handleOpenTaskModal
     },
     {
       title: "Generate Invoice",
       description: "Bill clients for completed work",
       icon: "FileText",
       color: "success",
-      action: () => navigate("/invoices")
+      action: handleOpenInvoiceModal
     }
   ];
 
@@ -192,8 +306,52 @@ const quickActions = [
               ))}
             </div>
           </Card>
-        </motion.div>
+</motion.div>
       </div>
+
+      {/* Modals */}
+      <Modal
+        isOpen={showClientModal}
+        onClose={handleCloseClientModal}
+        title="Create New Client"
+        size="lg"
+      >
+        <ClientForm
+          onSubmit={handleClientSubmit}
+          onCancel={handleCloseClientModal}
+          loading={loading}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={showTaskModal}
+        onClose={handleCloseTaskModal}
+        title="Create New Task"
+        size="lg"
+      >
+        <TaskForm
+          clients={clients}
+          projects={projects}
+          onSubmit={handleTaskSubmit}
+          onCancel={handleCloseTaskModal}
+          loading={loading}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={showInvoiceModal}
+        onClose={handleCloseInvoiceModal}
+        title="Generate Invoice"
+        size="lg"
+      >
+        <InvoiceForm
+          clients={clients}
+          projects={projects}
+          onSubmit={handleInvoiceSubmit}
+          onCancel={handleCloseInvoiceModal}
+          loading={loading}
+        />
+      </Modal>
     </div>
   );
 };

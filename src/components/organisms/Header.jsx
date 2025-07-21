@@ -4,7 +4,7 @@ import ApperIcon from "@/components/ApperIcon";
 import ThemeToggle from "@/components/molecules/ThemeToggle";
 import Button from "@/components/atoms/Button";
 
-const Header = ({ onMenuToggle, title = "Dashboard" }) => {
+const Header = ({ onMenuToggle, title = "Dashboard", onNewProject }) => {
   const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-30 glass dark:glass-dark border-b border-gray-200 dark:border-gray-700">
@@ -39,7 +39,7 @@ const Header = ({ onMenuToggle, title = "Dashboard" }) => {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => navigate('/projects')}
+              onClick={onNewProject}
               className="hidden sm:flex items-center space-x-2"
             >
               <ApperIcon name="Plus" className="w-4 h-4" />
