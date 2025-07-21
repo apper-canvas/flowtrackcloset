@@ -184,7 +184,7 @@ onAction={() => setShowAddModal(true)}
         </div>
       </Card>
 
-      {filteredClients.length === 0 && searchTerm && (
+{filteredClients.length === 0 && searchTerm && (
         <Empty 
           title="No clients found"
           description={`No clients match "${searchTerm}". Try adjusting your search.`}
@@ -192,7 +192,6 @@ onAction={() => setShowAddModal(true)}
           onAction={() => setSearchTerm("")}
         />
       )}
-</div>
 
       <Modal
         isOpen={showAddModal}
