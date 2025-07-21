@@ -19,13 +19,13 @@ export const projectService = {
     return projects.filter(p => p.clientId === parseInt(clientId)).map(p => ({ ...p }));
   },
 
-  create: async (projectData) => {
+create: async (projectData) => {
     await new Promise(resolve => setTimeout(resolve, 400));
     const newId = Math.max(...projects.map(p => p.Id)) + 1;
     const newProject = {
       Id: newId,
       ...projectData,
-      startDate: new Date().toISOString()
+      createdAt: new Date().toISOString()
     };
     projects.push(newProject);
     return { ...newProject };

@@ -1,15 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import ProjectForm from "@/components/molecules/ProjectForm";
+import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
-import Card from "@/components/atoms/Card";
-import Badge from "@/components/atoms/Badge";
-import SearchBar from "@/components/molecules/SearchBar";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
-import { projectService } from "@/services/api/projectService";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import Projects from "@/components/pages/Projects";
+import SearchBar from "@/components/molecules/SearchBar";
+import Card from "@/components/atoms/Card";
+import Modal from "@/components/atoms/Modal";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
 import { clientService } from "@/services/api/clientService";
+import { projectService } from "@/services/api/projectService";
 
 const ProjectGrid = () => {
   const [projects, setProjects] = useState([]);
@@ -17,6 +22,7 @@ const ProjectGrid = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showProjectModal, setShowProjectModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -34,14 +40,26 @@ const ProjectGrid = () => {
       
       setProjects(projectsData);
       setClients(clientsData);
-    } catch (err) {
+} catch (err) {
       setError("Failed to load projects. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const getClientName = (clientId) => {
+  const handleCreateProject = async (projectData) => {
+    try {
+      const newProject = await projectService.create(projectData);
+      setProjects(prev => [...prev, newProject]);
+      setShowProjectModal(false);
+      toast.success("Project created successfully!");
+      loadData(); // Refresh to ensure data consistency
+    } catch (error) {
+      toast.error("Failed to create project. Please try again.");
+    }
+  };
+
+const getClientName = (clientId) => {
     const client = clients.find(c => c.Id === clientId);
     return client ? client.name : "Unknown Client";
   };
@@ -74,26 +92,36 @@ const ProjectGrid = () => {
 
   if (projects.length === 0) {
     return (
-      <Empty 
+<Empty 
         title="No projects yet"
         description="Create your first project to start tracking progress and deliverables."
         actionText="Create Project"
-        onAction={() => console.log("Create project clicked")}
+        onAction={() => setShowProjectModal(true)}
       />
     );
   }
 
-  return (
+return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h2>
-        <div className="w-full sm:w-auto">
-          <SearchBar
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search projects..."
-            className="sm:w-80"
-          />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <Button
+            variant="primary"
+            onClick={() => setShowProjectModal(true)}
+            className="sm:w-auto"
+          >
+            <ApperIcon name="Plus" className="w-4 h-4 mr-2" />
+            New Project
+          </Button>
+          <div className="w-full sm:w-auto">
+            <SearchBar
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search projects..."
+              className="sm:w-80"
+            />
+          </div>
         </div>
       </div>
 
@@ -161,7 +189,7 @@ const ProjectGrid = () => {
         ))}
       </div>
 
-      {filteredProjects.length === 0 && searchTerm && (
+{filteredProjects.length === 0 && searchTerm && (
         <Empty 
           title="No projects found"
           description={`No projects match "${searchTerm}". Try adjusting your search.`}
@@ -169,6 +197,19 @@ const ProjectGrid = () => {
           onAction={() => setSearchTerm("")}
         />
       )}
+
+      <Modal
+        isOpen={showProjectModal}
+        onClose={() => setShowProjectModal(false)}
+        title="Create New Project"
+        size="lg"
+      >
+        <ProjectForm
+          clients={clients}
+          onSubmit={handleCreateProject}
+          onCancel={() => setShowProjectModal(false)}
+        />
+      </Modal>
     </div>
   );
 };
