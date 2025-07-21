@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import Modal from "@/components/atoms/Modal";
 import ClientForm from "@/components/molecules/ClientForm";
 import ApperIcon from "@/components/ApperIcon";
@@ -22,7 +23,7 @@ const ClientTable = () => {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     loadData();
   }, []);
@@ -164,9 +165,12 @@ onAction={() => setShowAddModal(true)}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {format(new Date(client.createdAt), "MMM dd, yyyy")}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <button className="text-primary-600 hover:text-primary-700 p-1 rounded">
+                      <button 
+                        onClick={() => navigate(`/clients/${client.Id}`)}
+                        className="text-primary-600 hover:text-primary-700 p-1 rounded"
+                      >
                         <ApperIcon name="Eye" className="w-4 h-4" />
                       </button>
                       <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded">

@@ -1,17 +1,18 @@
 import React, { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import Sidebar from "@/components/organisms/Sidebar";
 import Header from "@/components/organisms/Header";
 import Dashboard from "@/components/pages/Dashboard";
 import Clients from "@/components/pages/Clients";
+import ClientDetail from "@/components/pages/ClientDetail";
 import Projects from "@/components/pages/Projects";
 import Tasks from "@/components/pages/Tasks";
 import Invoices from "@/components/pages/Invoices";
-
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const location = useLocation();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const toggleSidebarCollapse = () => setSidebarCollapsed(!sidebarCollapsed);
@@ -29,6 +30,9 @@ function App() {
       case "/invoices":
         return "Invoices";
       default:
+        if (pathname.startsWith("/clients/")) {
+          return "Client Details";
+        }
         return "Dashboard";
     }
   };
@@ -43,15 +47,16 @@ function App() {
       />
       
       <div className={`lg:flex lg:flex-col ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"} transition-all duration-300`}>
-        <Header 
+<Header 
           onMenuToggle={toggleSidebar}
-          title={getPageTitle(window.location.pathname)}
+          title={getPageTitle(location.pathname)}
         />
         
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <Routes>
+<Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/clients" element={<Clients />} />
+            <Route path="/clients/:id" element={<ClientDetail />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/invoices" element={<Invoices />} />

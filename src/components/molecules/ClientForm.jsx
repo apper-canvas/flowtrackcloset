@@ -5,13 +5,13 @@ import Label from "@/components/atoms/Label";
 import { clientService } from "@/services/api/clientService";
 import { toast } from "react-toastify";
 
-const ClientForm = ({ onSubmit, onCancel, loading: externalLoading = false }) => {
+const ClientForm = ({ client, onSubmit, onCancel, loading: externalLoading = false }) => {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    company: "",
-    phone: "",
-    notes: ""
+    name: client?.name || "",
+    email: client?.email || "",
+    company: client?.company || "",
+    phone: client?.phone || "",
+    notes: client?.notes || ""
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -53,7 +53,7 @@ const ClientForm = ({ onSubmit, onCancel, loading: externalLoading = false }) =>
     }
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -62,11 +62,19 @@ const ClientForm = ({ onSubmit, onCancel, loading: externalLoading = false }) =>
 
     try {
       setLoading(true);
-      const newClient = await clientService.create(formData);
-      toast.success("Client created successfully!");
-      onSubmit(newClient);
+      if (client) {
+        // Edit mode
+        const updatedClient = await clientService.update(client.Id, formData);
+        toast.success("Client updated successfully!");
+        onSubmit(updatedClient);
+      } else {
+        // Create mode
+        const newClient = await clientService.create(formData);
+        toast.success("Client created successfully!");
+        onSubmit(newClient);
+      }
     } catch (error) {
-      toast.error("Failed to create client. Please try again.");
+      toast.error(`Failed to ${client ? 'update' : 'create'} client. Please try again.`);
     } finally {
       setLoading(false);
     }
@@ -179,12 +187,15 @@ const ClientForm = ({ onSubmit, onCancel, loading: externalLoading = false }) =>
         >
           Cancel
         </Button>
-        <Button
+<Button
           type="submit"
           variant="primary"
           disabled={isLoading}
         >
-          {isLoading ? "Creating..." : "Create Client"}
+          {isLoading 
+            ? (client ? "Updating..." : "Creating...") 
+            : (client ? "Update Client" : "Create Client")
+          }
         </Button>
       </div>
     </form>
