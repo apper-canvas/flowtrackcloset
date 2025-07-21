@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { format, differenceInDays, isAfter, isBefore } from "date-fns";
+import { differenceInDays, format, isAfter, isBefore } from "date-fns";
 import { toast } from "react-toastify";
+import { KanbanBoard } from "@/components/organisms/TaskList";
 import ApperIcon from "@/components/ApperIcon";
-import Card from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import Badge from "@/components/atoms/Badge";
-import Modal from "@/components/atoms/Modal";
-import ProjectForm from "@/components/molecules/ProjectForm";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
-import { projectService } from "@/services/api/projectService";
-import { clientService } from "@/services/api/clientService";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import Tasks from "@/components/pages/Tasks";
+import ProjectForm from "@/components/molecules/ProjectForm";
+import Card from "@/components/atoms/Card";
+import Modal from "@/components/atoms/Modal";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
 import { taskService } from "@/services/api/taskService";
-import KanbanBoard from "@/components/organisms/TaskList";
-
-const ProjectDetail = () => {
-  const { id } = useParams();
+import { clientService } from "@/services/api/clientService";
+import { projectService } from "@/services/api/projectService";
+export default function ProjectDetail() {
+  const { id } = useParams()
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [client, setClient] = useState(null);
@@ -492,5 +492,3 @@ const ProjectDetail = () => {
     </div>
   );
 };
-
-export default ProjectDetail;
