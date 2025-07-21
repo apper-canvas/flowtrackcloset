@@ -19,13 +19,13 @@ export const taskService = {
     return tasks.filter(t => t.projectId === parseInt(projectId)).map(t => ({ ...t }));
   },
 
-  create: async (taskData) => {
+create: async (taskData) => {
     await new Promise(resolve => setTimeout(resolve, 400));
     const newId = Math.max(...tasks.map(t => t.Id)) + 1;
     const newTask = {
       Id: newId,
       ...taskData,
-      status: "Pending"
+      status: taskData.status || "Pending"
     };
     tasks.push(newTask);
     return { ...newTask };
@@ -36,6 +36,16 @@ export const taskService = {
     const index = tasks.findIndex(t => t.Id === parseInt(id));
     if (index !== -1) {
       tasks[index] = { ...tasks[index], ...taskData };
+      return { ...tasks[index] };
+    }
+    return null;
+  },
+
+  updateStatus: async (id, status) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const index = tasks.findIndex(t => t.Id === parseInt(id));
+    if (index !== -1) {
+      tasks[index] = { ...tasks[index], status };
       return { ...tasks[index] };
     }
     return null;

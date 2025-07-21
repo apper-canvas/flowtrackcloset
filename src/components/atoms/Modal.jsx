@@ -62,8 +62,9 @@ const Modal = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={cn(
-              "relative w-full max-w-md max-h-[90vh] overflow-auto bg-white dark:bg-surface-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 glass",
+className={cn(
+              "relative w-full max-h-[90vh] overflow-auto bg-white dark:bg-surface-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 glass",
+              props.size === "lg" ? "max-w-2xl" : props.size === "xl" ? "max-w-4xl" : "max-w-md",
               className
             )}
             {...props}

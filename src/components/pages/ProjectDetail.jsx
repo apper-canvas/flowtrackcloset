@@ -15,6 +15,7 @@ import Empty from "@/components/ui/Empty";
 import { projectService } from "@/services/api/projectService";
 import { clientService } from "@/services/api/clientService";
 import { taskService } from "@/services/api/taskService";
+import KanbanBoard from "@/components/organisms/TaskList";
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -465,82 +466,13 @@ const ProjectDetail = () => {
         </Card>
       </motion.div>
 
-      {/* Task List Preview */}
+{/* Project Tasks Kanban Board */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.7 }}
       >
-        <Card variant="glass" className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Tasks ({tasks.length})
-            </h2>
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/tasks')}
-              size="sm"
-            >
-              View All Tasks
-              <ApperIcon name="ArrowRight" className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
-          
-          {tasks.length === 0 ? (
-            <Empty
-              title="No tasks yet"
-              description="This project doesn't have any tasks assigned."
-              actionText="View All Tasks"
-              onAction={() => navigate('/tasks')}
-            />
-          ) : (
-            <div className="space-y-3">
-              {tasks.slice(0, 5).map((task, index) => (
-                <motion.div
-                  key={task.Id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-surface-700/30 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      task.status === "Completed" ? "bg-green-500" :
-                      task.status === "In Progress" ? "bg-blue-500" : "bg-gray-400"
-                    }`}></div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                        {task.title}
-                      </h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Due: {format(new Date(task.dueDate), "MMM dd, yyyy")}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={getPriorityVariant(task.priority)} size="sm">
-                      {task.priority}
-                    </Badge>
-                    <Badge variant={getTaskStatusVariant(task.status)} size="sm">
-                      {task.status}
-                    </Badge>
-                  </div>
-                </motion.div>
-              ))}
-              {tasks.length > 5 && (
-                <div className="text-center pt-3">
-                  <Button
-                    variant="ghost"
-                    onClick={() => navigate('/tasks')}
-                    size="sm"
-                  >
-                    View {tasks.length - 5} more tasks
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </Card>
+        <KanbanBoard projectId={parseInt(id)} />
       </motion.div>
 
       {/* Edit Modal */}
