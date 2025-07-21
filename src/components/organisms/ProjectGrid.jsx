@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import ProjectForm from "@/components/molecules/ProjectForm";
@@ -17,13 +18,14 @@ import { clientService } from "@/services/api/clientService";
 import { projectService } from "@/services/api/projectService";
 
 const ProjectGrid = () => {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showProjectModal, setShowProjectModal] = useState(false);
-
+  const [editingProject, setEditingProject] = useState(null);
   useEffect(() => {
     loadData();
   }, []);
@@ -57,6 +59,39 @@ const ProjectGrid = () => {
     } catch (error) {
       toast.error("Failed to create project. Please try again.");
     }
+};
+
+  const handleEditProject = async (projectData) => {
+    try {
+      const updatedProject = await projectService.update(editingProject.Id, projectData);
+      setProjects(prev => prev.map(p => p.Id === editingProject.Id ? updatedProject : p));
+      setEditingProject(null);
+      setShowProjectModal(false);
+      toast.success("Project updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update project. Please try again.");
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+      try {
+        await projectService.delete(projectId);
+        setProjects(prev => prev.filter(p => p.Id !== projectId));
+        toast.success("Project deleted successfully!");
+      } catch (error) {
+        toast.error("Failed to delete project. Please try again.");
+      }
+    }
+  };
+
+  const handleViewProject = (project) => {
+    navigate(`/projects/${project.Id}`);
+  };
+
+  const handleEditClick = (project) => {
+    setEditingProject(project);
+    setShowProjectModal(true);
   };
 
 const getClientName = (clientId) => {
@@ -164,15 +199,27 @@ return (
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-between">
+<div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <button className="text-primary-600 hover:text-primary-700 p-1 rounded">
+                  <button 
+                    onClick={() => handleViewProject(project)}
+                    className="text-primary-600 hover:text-primary-700 p-1 rounded transition-colors"
+                    title="View Details"
+                  >
                     <ApperIcon name="Eye" className="w-4 h-4" />
                   </button>
-                  <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded">
+                  <button 
+                    onClick={() => handleEditClick(project)}
+                    className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded transition-colors"
+                    title="Edit Project"
+                  >
                     <ApperIcon name="Edit" className="w-4 h-4" />
                   </button>
-                  <button className="text-red-600 hover:text-red-700 p-1 rounded">
+                  <button 
+                    onClick={() => handleDeleteProject(project.Id)}
+                    className="text-red-600 hover:text-red-700 p-1 rounded transition-colors"
+                    title="Delete Project"
+                  >
                     <ApperIcon name="Trash2" className="w-4 h-4" />
                   </button>
                 </div>
@@ -198,16 +245,23 @@ return (
         />
       )}
 
-      <Modal
+<Modal
         isOpen={showProjectModal}
-        onClose={() => setShowProjectModal(false)}
-        title="Create New Project"
+        onClose={() => {
+          setShowProjectModal(false);
+          setEditingProject(null);
+        }}
+        title={editingProject ? "Edit Project" : "Create New Project"}
         size="lg"
       >
         <ProjectForm
+          project={editingProject}
           clients={clients}
-          onSubmit={handleCreateProject}
-          onCancel={() => setShowProjectModal(false)}
+          onSubmit={editingProject ? handleEditProject : handleCreateProject}
+          onCancel={() => {
+            setShowProjectModal(false);
+            setEditingProject(null);
+          }}
         />
       </Modal>
     </div>
