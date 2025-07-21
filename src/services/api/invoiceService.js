@@ -170,13 +170,14 @@ export const invoiceService = {
     }
   },
 
-  update: async (id, invoiceData) => {
+update: async (id, invoiceData) => {
     try {
       const params = {
         records: [{
           Id: parseInt(id),
           projectId_c: parseInt(invoiceData.projectId),
           amount_c: invoiceData.amount,
+          status_c: invoiceData.status,
           dueDate_c: invoiceData.dueDate,
           Tags: invoiceData.tags || ""
         }]

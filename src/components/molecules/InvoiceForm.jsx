@@ -8,6 +8,7 @@ import Button from "@/components/atoms/Button";
 const InvoiceForm = ({ invoice, projects, onSubmit, onCancel, loading }) => {
 const [formData, setFormData] = useState({
     projectId: invoice?.projectId_c?.Id || invoice?.projectId_c || "",
+    status: invoice?.status_c || "Draft",
     dueDate: invoice?.dueDate_c ? invoice.dueDate_c.split('T')[0] : "",
     lineItems: invoice?.lineItems || [{ description: "", amount: "" }]
   });
@@ -90,8 +91,9 @@ const [formData, setFormData] = useState({
 
     const totalAmount = validLineItems.reduce((sum, item) => sum + parseFloat(item.amount), 0);
 
-    const submitData = {
+const submitData = {
       projectId: parseInt(formData.projectId),
+      status: formData.status,
       dueDate: formData.dueDate,
       amount: totalAmount,
       lineItems: validLineItems.map(item => ({
@@ -129,6 +131,23 @@ const [formData, setFormData] = useState({
           </select>
           {errors.projectId && (
             <p className="mt-1 text-sm text-red-600">{errors.projectId}</p>
+          )}
+        </div>
+<div>
+          <Label htmlFor="status">Status *</Label>
+          <select
+            id="status"
+            value={formData.status}
+            onChange={(e) => handleInputChange("status", e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="Draft">Draft</option>
+            <option value="Sent">Sent</option>
+            <option value="Paid">Paid</option>
+            <option value="Overdue">Overdue</option>
+          </select>
+          {errors.status && (
+            <p className="mt-1 text-sm text-red-600">{errors.status}</p>
           )}
         </div>
 
