@@ -67,8 +67,8 @@ useEffect(() => {
       setLoading(true)
       setError('')
 const data = projectId ? 
-         await taskService.getByProjectId(projectId) : 
-         await taskService.getAll()
+        await taskService.getByProjectId(projectId) : 
+        await taskService.getAll()
       setTasks(data)
     } catch (err) {
       setError('Failed to load tasks')
@@ -218,7 +218,7 @@ const getPriorityColor = (priority) => {
       setTasks(prevTasks =>
         prevTasks.map(task =>
           task.Id === taskId
-            ? { ...task, status: newStatus }
+? { ...task, status_c: newStatus }
             : task
         )
       )
@@ -261,7 +261,7 @@ const handleSaveTask = async (taskData) => {
         )
         toast.success('Task updated successfully')
       } else {
-        const newTaskData = projectId ? { ...taskData, projectId } : taskData
+const newTaskData = projectId ? { ...taskData, projectId: projectId } : taskData
         const newTask = await taskService.create(newTaskData)
         setTasks(prevTasks => [...prevTasks, newTask])
         toast.success('Task created successfully')
