@@ -17,7 +17,6 @@ import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import { invoiceService } from "@/services/api/invoiceService";
 import { projectService } from "@/services/api/projectService";
-
 const InvoiceTable = () => {
   const [invoices, setInvoices] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -26,12 +25,13 @@ const InvoiceTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingInvoice, setEditingInvoice] = useState(null);
+const [editingInvoice, setEditingInvoice] = useState(null);
   const [creating, setCreating] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
   const [paymentDate, setPaymentDate] = useState("");
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   useEffect(() => {
     loadData();
   }, []);
@@ -136,11 +136,158 @@ const handleStatusUpdate = async (invoiceId, newStatus, paymentDate = null) => {
       toast.success("Invoice updated successfully");
     } catch (err) {
       toast.error("Failed to update invoice. Please try again.");
-    }
+}
   };
-
-  const handleDownloadInvoice = (invoice) => {
-    toast.info("Invoice download functionality will be implemented in a future update.");
+  const handleDownloadInvoice = async (invoice) => {
+    if (downloading) return;
+    
+    try {
+      setDownloading(true);
+      
+      // Dynamic import for jsPDF to reduce bundle size
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      // Get project name for the invoice
+      const projectName = getProjectName(invoice.projectId_c);
+      
+      // Company Header with gradient-like styling
+      doc.setFillColor(91, 79, 232); // Primary color
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('FlowTrack', 20, 25);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Professional Invoice Management', 20, 32);
+      
+      // Invoice Header
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('INVOICE', 150, 60);
+      
+      // Invoice Details Box
+      doc.setDrawColor(91, 79, 232);
+      doc.setLineWidth(1);
+      doc.rect(140, 70, 60, 40, 'S');
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Invoice Number:', 145, 80);
+      doc.setFont('helvetica', 'normal');
+      doc.text(invoice.invoiceNumber_c || 'N/A', 145, 87);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('Invoice Date:', 145, 95);
+      doc.setFont('helvetica', 'normal');
+      doc.text(format(new Date(), "MMM dd, yyyy"), 145, 102);
+      
+      // Client Information
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Bill To:', 20, 80);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Project: ${projectName}`, 20, 90);
+      doc.text(`Due Date: ${format(new Date(invoice.dueDate_c), "MMM dd, yyyy")}`, 20, 98);
+      doc.text(`Status: ${invoice.status_c}`, 20, 106);
+      
+      // Payment Date if paid
+      if (invoice.status_c === 'Paid' && invoice.paymentDate_c) {
+        doc.text(`Payment Date: ${format(new Date(invoice.paymentDate_c), "MMM dd, yyyy")}`, 20, 114);
+      }
+      
+      // Invoice Items Table Header
+      const tableStartY = 130;
+      doc.setFillColor(248, 249, 252); // Light gray background
+      doc.rect(20, tableStartY, 170, 12, 'F');
+      
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(20, tableStartY, 190, tableStartY);
+      doc.line(20, tableStartY + 12, 190, tableStartY + 12);
+      
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Description', 25, tableStartY + 8);
+      doc.text('Amount', 160, tableStartY + 8);
+      
+      // Invoice Item
+      const itemY = tableStartY + 20;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Invoice for ${projectName}`, 25, itemY);
+      doc.text(`$${invoice.amount_c?.toLocaleString() || '0.00'}`, 160, itemY);
+      
+      // Table borders
+      doc.line(20, itemY + 5, 190, itemY + 5);
+      doc.line(20, tableStartY, 20, itemY + 5);
+      doc.line(190, tableStartY, 190, itemY + 5);
+      
+      // Total Section
+      const totalY = itemY + 20;
+      doc.setFillColor(91, 79, 232);
+      doc.rect(130, totalY, 60, 15, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Total Amount:', 135, totalY + 6);
+      doc.text(`$${invoice.amount_c?.toLocaleString() || '0.00'}`, 135, totalY + 12);
+      
+      // Status Badge
+      const statusY = totalY + 25;
+      let statusColor;
+      switch (invoice.status_c) {
+        case 'Paid':
+          statusColor = [16, 185, 129]; // Green
+          break;
+        case 'Sent':
+          statusColor = [59, 130, 246]; // Blue
+          break;
+        case 'Overdue':
+          statusColor = [239, 68, 68]; // Red
+          break;
+        default:
+          statusColor = [156, 163, 175]; // Gray
+      }
+      
+      doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
+      doc.roundedRect(20, statusY, 30, 10, 2, 2, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      const statusText = doc.getTextWidth(invoice.status_c);
+      doc.text(invoice.status_c, 35 - (statusText / 2), statusY + 6.5);
+      
+      // Footer
+      doc.setTextColor(156, 163, 175);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Generated by FlowTrack - Professional Invoice Management', 105, 280, { align: 'center' });
+      doc.text(`Generated on ${format(new Date(), "MMM dd, yyyy 'at' h:mm a")}`, 105, 287, { align: 'center' });
+      
+      // Create filename
+      const safeProjectName = projectName.replace(/[^a-z0-9]/gi, '_');
+      const safeInvoiceNumber = (invoice.invoiceNumber_c || 'invoice').replace(/[^a-z0-9]/gi, '_');
+      const filename = `Invoice_${safeInvoiceNumber}_${safeProjectName}.pdf`;
+      
+      // Download the PDF
+      doc.save(filename);
+      toast.success(`Invoice downloaded successfully as ${filename}`);
+      
+    } catch (error) {
+      console.error('Error generating invoice PDF:', error);
+      toast.error('Failed to download invoice. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleDeleteInvoice = async (invoiceId) => {
@@ -333,12 +480,16 @@ if (error) {
                            <ApperIcon name="DollarSign" className="w-4 h-4" />
                          </button>
                        )}
-                      <button 
+<button 
                         onClick={() => handleDownloadInvoice(invoice)}
-                        className="text-green-600 hover:text-green-700 p-1 rounded"
-                        title="Download Invoice"
+                        disabled={downloading}
+                        className="text-green-600 hover:text-green-700 p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={downloading ? "Generating PDF..." : "Download Invoice"}
                       >
-                        <ApperIcon name="Download" className="w-4 h-4" />
+                        <ApperIcon 
+                          name={downloading ? "Loader2" : "Download"} 
+                          className={`w-4 h-4 ${downloading ? 'animate-spin' : ''}`} 
+                        />
                       </button>
                       <button 
                         onClick={() => handleDeleteInvoice(invoice.Id)}
