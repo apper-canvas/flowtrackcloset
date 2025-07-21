@@ -20,11 +20,11 @@ useEffect(() => {
     if (task) {
       setFormData({
         title: task.title_c || task.Name || "",
-        description: task.description || "",
+        description: task.description_c || task.description || "",
         projectId: task.projectId_c?.Id || task.projectId_c || projectId || "",
         priority: task.priority_c || "Medium",
         dueDate: task.dueDate_c ? format(new Date(task.dueDate_c), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-status: task.status_c || "Pending"
+        status: task.status_c || "Pending"
       });
     }
   }, [task, projectId]);
@@ -108,29 +108,28 @@ status: task.status_c || "Pending"
         />
       </div>
 
-      {!projectId && (
-        <div>
-          <Label htmlFor="projectId" required>
-            Project
-          </Label>
-          <select
-            id="projectId"
-            value={formData.projectId}
-            onChange={(e) => handleChange("projectId", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-surface-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-<option value="">Select a project</option>
-            {projects.map((project) => (
-              <option key={project.Id} value={project.Id}>
-                {project.Name}
-              </option>
-            ))}
-          </select>
-          {errors.projectId && (
-            <p className="text-sm text-red-600 mt-1">{errors.projectId}</p>
-          )}
-        </div>
-      )}
+<div>
+        <Label htmlFor="projectId" required>
+          Project
+        </Label>
+        <select
+          id="projectId"
+          value={formData.projectId}
+          onChange={(e) => handleChange("projectId", e.target.value)}
+          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-surface-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+          disabled={!!projectId && !task}
+        >
+          <option value="">Select a project</option>
+          {projects.map((project) => (
+            <option key={project.Id} value={project.Id}>
+              {project.Name}
+            </option>
+          ))}
+        </select>
+        {errors.projectId && (
+          <p className="text-sm text-red-600 mt-1">{errors.projectId}</p>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
