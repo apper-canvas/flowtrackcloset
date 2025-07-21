@@ -1,24 +1,26 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
+import DashboardStats from "@/components/organisms/DashboardStats";
+import TaskForm from "@/components/organisms/TaskForm";
+import ClientForm from "@/components/molecules/ClientForm";
+import ProjectForm from "@/components/molecules/ProjectForm";
+import InvoiceForm from "@/components/molecules/InvoiceForm";
 import Card from "@/components/atoms/Card";
 import Modal from "@/components/atoms/Modal";
-import ProjectForm from "@/components/molecules/ProjectForm";
-import ClientForm from "@/components/molecules/ClientForm";
-import TaskForm from "@/components/organisms/TaskForm";
-import InvoiceForm from "@/components/molecules/InvoiceForm";
-import DashboardStats from "@/components/organisms/DashboardStats";
+import { taskService } from "@/services/api/taskService";
+import { invoiceService } from "@/services/api/invoiceService";
 import { clientService } from "@/services/api/clientService";
 import { projectService } from "@/services/api/projectService";
-import { taskService } from "@/services/api/taskService";
-import invoiceService from "@/services/api/invoiceService";
-import { toast } from "react-toastify";
-const Dashboard = ({ onNewProject }) => {
+
+const Dashboard = () => {
   const navigate = useNavigate();
   const [showClientModal, setShowClientModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [showProjectModal, setShowProjectModal] = useState(false);
   const [clients, setClients] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -119,10 +121,43 @@ const Dashboard = ({ onNewProject }) => {
     } finally {
       setLoading(false);
     }
+};
+
+  const handleOpenProjectModal = async () => {
+    try {
+      setLoading(true);
+      const clientsData = await clientService.getAll();
+      setClients(clientsData);
+      setShowProjectModal(true);
+    } catch (error) {
+      console.error('Error loading clients:', error);
+      toast.error('Failed to load clients');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseProjectModal = () => {
+    setShowProjectModal(false);
+    setClients([]);
+  };
+
+  const handleProjectSubmit = async (projectData) => {
+    try {
+      setLoading(true);
+      await projectService.create(projectData);
+      toast.success('Project created successfully!');
+      handleCloseProjectModal();
+    } catch (error) {
+      console.error('Error creating project:', error);
+      toast.error('Failed to create project');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const quickActions = [
-{
+    {
       title: "New Client",
       description: "Add a new client to your portfolio",
       icon: "UserPlus",
@@ -134,7 +169,7 @@ const Dashboard = ({ onNewProject }) => {
       description: "Start a new project for existing clients",
       icon: "FolderPlus",
       color: "info",
-      action: onNewProject
+      action: handleOpenProjectModal
     },
     {
       title: "Add Task",
@@ -349,6 +384,20 @@ const Dashboard = ({ onNewProject }) => {
           projects={projects}
           onSubmit={handleInvoiceSubmit}
           onCancel={handleCloseInvoiceModal}
+          loading={loading}
+        />
+</Modal>
+
+      <Modal
+        isOpen={showProjectModal}
+        onClose={handleCloseProjectModal}
+        title="Create New Project"
+        size="lg"
+      >
+        <ProjectForm
+          clients={clients}
+          onSubmit={handleProjectSubmit}
+          onCancel={handleCloseProjectModal}
           loading={loading}
         />
       </Modal>
