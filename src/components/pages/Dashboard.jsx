@@ -9,7 +9,7 @@ import ClientForm from "@/components/molecules/ClientForm";
 import TaskForm from "@/components/organisms/TaskForm";
 import InvoiceForm from "@/components/molecules/InvoiceForm";
 import DashboardStats from "@/components/organisms/DashboardStats";
-import clientService from "@/services/api/clientService";
+import { clientService } from "@/services/api/clientService";
 import projectService from "@/services/api/projectService";
 import taskService from "@/services/api/taskService";
 import invoiceService from "@/services/api/invoiceService";
