@@ -149,10 +149,10 @@ const statusOptions = [
           disabled={isLoading}
           className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-600 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed hover:border-gray-300 dark:hover:border-gray-500"
         >
-          <option value="">Select a client</option>
+<option value="">Select a client</option>
           {clients.map(client => (
             <option key={client.Id} value={client.Id}>
-              {client.name} - {client.company}
+              {client.Name} - {client.company_c}
             </option>
           ))}
         </select>
