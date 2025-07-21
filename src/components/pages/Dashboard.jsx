@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { recentActivityService } from "@/services/api/recentActivityService";
 import ApperIcon from "@/components/ApperIcon";
 import DashboardStats from "@/components/organisms/DashboardStats";
 import TaskForm from "@/components/organisms/TaskForm";
@@ -14,7 +15,6 @@ import { taskService } from "@/services/api/taskService";
 import { invoiceService } from "@/services/api/invoiceService";
 import { clientService } from "@/services/api/clientService";
 import { projectService } from "@/services/api/projectService";
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const [showClientModal, setShowClientModal] = useState(false);
@@ -24,6 +24,28 @@ const Dashboard = () => {
   const [clients, setClients] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
+  const [activitiesError, setActivitiesError] = useState(null);
+
+  const loadRecentActivities = async () => {
+    try {
+      setActivitiesLoading(true);
+      setActivitiesError(null);
+      const activities = await recentActivityService.getAll();
+      setRecentActivities(activities);
+    } catch (error) {
+      console.error('Error loading recent activities:', error);
+      setActivitiesError('Failed to load recent activities');
+      toast.error('Failed to load recent activities');
+    } finally {
+      setActivitiesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRecentActivities();
+  }, []);
 
   const handleOpenClientModal = () => {
     setShowClientModal(true);
@@ -119,10 +141,9 @@ const Dashboard = () => {
       console.error('Error creating invoice:', error);
       toast.error('Failed to create invoice');
     } finally {
-      setLoading(false);
+setLoading(false);
     }
-};
-
+  };
   const handleOpenProjectModal = async () => {
     try {
       setLoading(true);
@@ -183,44 +204,58 @@ const Dashboard = () => {
       description: "Bill clients for completed work",
       icon: "FileText",
       color: "success",
-      action: handleOpenInvoiceModal
+action: handleOpenInvoiceModal
     }
   ];
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: "project",
-      title: "E-commerce Platform Redesign",
-      description: "Status updated to In Progress",
-      time: "2 hours ago",
-      icon: "FolderOpen"
-    },
-    {
-      id: 2,
-      type: "task",
-      title: "Frontend Development",
-      description: "Task completed by team",
-      time: "4 hours ago",
-      icon: "CheckSquare"
-    },
-    {
-      id: 3,
-      type: "invoice",
-      title: "Invoice INV-2024-002",
-      description: "Sent to TechStartup Inc",
-      time: "1 day ago",
-      icon: "FileText"
-    },
-    {
-      id: 4,
-      type: "client",
-      title: "Lisa Thompson",
-      description: "New client added",
-      time: "2 days ago",
-      icon: "UserPlus"
+  const formatActivityTime = (timestamp) => {
+    if (!timestamp) return 'Unknown time';
+    
+    const activityDate = new Date(timestamp);
+    const now = new Date();
+    const diffInMs = now - activityDate;
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    if (diffInDays < 30) return `${diffInDays} days ago`;
+    
+    return activityDate.toLocaleDateString();
+  };
+
+  const getActivityIcon = (activityType) => {
+    switch (activityType?.toLowerCase()) {
+      case 'project_created':
+      case 'project_updated':
+        return 'FolderOpen';
+      case 'task_created':
+      case 'task_completed':
+        return 'CheckSquare';
+      case 'invoice_created':
+      case 'invoice_sent':
+        return 'FileText';
+      case 'client_created':
+        return 'UserPlus';
+      default:
+        return 'Activity';
     }
-  ];
+  };
+
+  const getActivityTitle = (activity) => {
+    if (activity.project_c?.Name) return activity.project_c.Name;
+    if (activity.task_c?.Name) return activity.task_c.Name;
+    if (activity.invoice_c?.Name) return activity.invoice_c.Name;
+    if (activity.client_c?.Name) return activity.client_c.Name;
+    return activity.Name || 'Unknown Activity';
+  };
+
+  const getActivityDescription = (activity) => {
+    const type = activity.activityType_c || 'Activity performed';
+    return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
 
   return (
     <div className="space-y-8">
@@ -312,36 +347,57 @@ const Dashboard = () => {
         >
           <Card variant="glass" className="p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-              Recent Activity
+Recent Activity
             </h2>
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <motion.div
-                  key={activity.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 * index }}
-                  className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-surface-700/30 transition-colors"
-                >
-                  <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
-                    <ApperIcon name={activity.icon} className="w-4 h-4 text-primary-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {activity.title}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {activity.description}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {activity.time}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+              {activitiesLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                </div>
+              ) : activitiesError ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-red-600 dark:text-red-400">{activitiesError}</p>
+                  <button 
+                    onClick={loadRecentActivities}
+                    className="mt-2 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                  >
+                    Try again
+                  </button>
+                </div>
+              ) : recentActivities.length === 0 ? (
+                <div className="text-center py-8">
+                  <ApperIcon name="Activity" className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400">No recent activities</p>
+                </div>
+              ) : (
+                recentActivities.map((activity, index) => (
+                  <motion.div
+                    key={activity.Id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 * index }}
+                    className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-surface-700/30 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
+                      <ApperIcon name={getActivityIcon(activity.activityType_c)} className="w-4 h-4 text-primary-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {getActivityTitle(activity)}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {getActivityDescription(activity)}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {formatActivityTime(activity.timestamp_c)}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+</div>
           </Card>
-</motion.div>
+        </motion.div>
       </div>
 
       {/* Modals */}
@@ -384,10 +440,9 @@ const Dashboard = () => {
           projects={projects}
           onSubmit={handleInvoiceSubmit}
           onCancel={handleCloseInvoiceModal}
-          loading={loading}
+loading={loading}
         />
-</Modal>
-
+      </Modal>
       <Modal
         isOpen={showProjectModal}
         onClose={handleCloseProjectModal}

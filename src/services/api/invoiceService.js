@@ -14,8 +14,7 @@ export const invoiceService = {
 fields: [
           { field: { Name: "Name" } },
           { field: { Name: "projectId_c" } },
-          { field: { Name: "invoiceNumber_c" } },
-          { field: { Name: "invoiceTitle_c" } },
+{ field: { Name: "invoiceNumber_c" } },
           { field: { Name: "amount_c" } },
           { field: { Name: "status_c" } },
           { field: { Name: "dueDate_c" } },
@@ -50,9 +49,8 @@ fields: [
       const params = {
 fields: [
           { field: { Name: "Name" } },
-          { field: { Name: "projectId_c" } },
+{ field: { Name: "projectId_c" } },
           { field: { Name: "invoiceNumber_c" } },
-          { field: { Name: "invoiceTitle_c" } },
           { field: { Name: "amount_c" } },
           { field: { Name: "status_c" } },
           { field: { Name: "dueDate_c" } },
@@ -84,9 +82,8 @@ fields: [
       const params = {
 fields: [
           { field: { Name: "Name" } },
-          { field: { Name: "projectId_c" } },
+{ field: { Name: "projectId_c" } },
           { field: { Name: "invoiceNumber_c" } },
-          { field: { Name: "invoiceTitle_c" } },
           { field: { Name: "amount_c" } },
           { field: { Name: "status_c" } },
           { field: { Name: "dueDate_c" } },
@@ -126,11 +123,10 @@ fields: [
       const invoiceNumber = `INV-${currentYear}-${Date.now().toString().slice(-6)}`;
       
 const params = {
-        records: [{
+records: [{
           Name: invoiceNumber,
           projectId_c: parseInt(invoiceData.projectId),
           invoiceNumber_c: invoiceNumber,
-          invoiceTitle_c: invoiceData.invoiceTitle || "",
           amount_c: invoiceData.amount,
           status_c: "Draft",
           dueDate_c: invoiceData.dueDate,
@@ -177,10 +173,9 @@ const params = {
 update: async (id, invoiceData) => {
     try {
 const params = {
-        records: [{
+records: [{
           Id: parseInt(id),
           projectId_c: parseInt(invoiceData.projectId),
-          invoiceTitle_c: invoiceData.invoiceTitle || "",
           amount_c: invoiceData.amount,
           status_c: invoiceData.status,
           dueDate_c: invoiceData.dueDate,
