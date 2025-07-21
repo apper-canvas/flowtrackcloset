@@ -3,15 +3,16 @@
     "Id": 1,
     "projectId": 3,
     "invoiceNumber": "INV-2024-001",
-    "amount": 8500,
+"amount": 8500,
     "status": "Paid",
-    "dueDate": "2024-03-15T00:00:00Z"
+    "dueDate": "2024-03-15T00:00:00Z",
+    "paymentDate": "2024-03-12T00:00:00Z"
   },
   {
     "Id": 2,
     "projectId": 1,
     "invoiceNumber": "INV-2024-002",
-    "amount": 12500,
+"amount": 12500,
     "status": "Sent",
     "dueDate": "2024-04-01T00:00:00Z"
   },

@@ -2,15 +2,17 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
-import InvoiceForm from "@/components/molecules/InvoiceForm";
 import ApperIcon from "@/components/ApperIcon";
 import Empty from "@/components/ui/Empty";
 import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import Invoices from "@/components/pages/Invoices";
 import SearchBar from "@/components/molecules/SearchBar";
+import InvoiceForm from "@/components/molecules/InvoiceForm";
 import Card from "@/components/atoms/Card";
 import Modal from "@/components/atoms/Modal";
+import Input from "@/components/atoms/Input";
+import Label from "@/components/atoms/Label";
 import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import { invoiceService } from "@/services/api/invoiceService";
@@ -23,6 +25,10 @@ const InvoiceTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
+  const [paymentDate, setPaymentDate] = useState("");
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   useEffect(() => {
     loadData();
   }, []);
@@ -58,6 +64,52 @@ const InvoiceTable = () => {
     } finally {
       setCreating(false);
     }
+};
+
+  const handleStatusUpdate = async (invoiceId, newStatus, paymentDate = null) => {
+    try {
+      setUpdatingStatus(true);
+      const updateData = { status: newStatus };
+      if (paymentDate) {
+        updateData.paymentDate = paymentDate;
+      }
+      
+      const updatedInvoice = await invoiceService.updateStatus(invoiceId, updateData);
+      setInvoices(prev => prev.map(invoice => 
+        invoice.Id === invoiceId ? updatedInvoice : invoice
+      ));
+      
+      toast.success(`Invoice marked as ${newStatus.toLowerCase()}`);
+    } catch (err) {
+      toast.error("Failed to update invoice status. Please try again.");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handleMarkAsSent = (invoiceId) => {
+    handleStatusUpdate(invoiceId, "Sent");
+  };
+
+  const handleMarkAsPaid = (invoiceId) => {
+    setSelectedInvoiceId(invoiceId);
+    setPaymentDate(new Date().toISOString().split('T')[0]);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSubmit = () => {
+    if (selectedInvoiceId && paymentDate) {
+      handleStatusUpdate(selectedInvoiceId, "Paid", paymentDate);
+      setShowPaymentModal(false);
+      setSelectedInvoiceId(null);
+      setPaymentDate("");
+    }
+  };
+
+  const calculateOutstandingAmount = () => {
+    return invoices
+      .filter(invoice => invoice.status !== "Paid")
+      .reduce((total, invoice) => total + invoice.amount, 0);
   };
 
   const getProjectName = (projectId) => {
@@ -105,7 +157,15 @@ if (invoices.length === 0) {
 return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Invoices</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Invoices</h2>
+          <div className="mt-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Total Outstanding: </span>
+            <span className="text-lg font-semibold text-gradient">
+              ${calculateOutstandingAmount().toLocaleString()}
+            </span>
+          </div>
+        </div>
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
           <Button
             onClick={() => setShowCreateModal(true)}
@@ -188,7 +248,7 @@ return (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {format(new Date(invoice.dueDate), "MMM dd, yyyy")}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
                       <button className="text-primary-600 hover:text-primary-700 p-1 rounded">
                         <ApperIcon name="Eye" className="w-4 h-4" />
@@ -196,6 +256,26 @@ return (
                       <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded">
                         <ApperIcon name="Edit" className="w-4 h-4" />
                       </button>
+                      {invoice.status === "Draft" && (
+                        <button 
+                          onClick={() => handleMarkAsSent(invoice.Id)}
+                          disabled={updatingStatus}
+                          className="text-blue-600 hover:text-blue-700 p-1 rounded disabled:opacity-50"
+                          title="Mark as Sent"
+                        >
+                          <ApperIcon name="Send" className="w-4 h-4" />
+                        </button>
+                      )}
+                      {(invoice.status === "Sent" || invoice.status === "Overdue") && (
+                        <button 
+                          onClick={() => handleMarkAsPaid(invoice.Id)}
+                          disabled={updatingStatus}
+                          className="text-green-600 hover:text-green-700 p-1 rounded disabled:opacity-50"
+                          title="Mark as Paid"
+                        >
+                          <ApperIcon name="DollarSign" className="w-4 h-4" />
+                        </button>
+                      )}
                       <button className="text-green-600 hover:text-green-700 p-1 rounded">
                         <ApperIcon name="Download" className="w-4 h-4" />
                       </button>
@@ -228,11 +308,45 @@ onAction={() => setSearchTerm("")}
           projects={projects}
           onSubmit={handleCreateInvoice}
           onCancel={() => setShowCreateModal(false)}
-          loading={creating}
+loading={creating}
         />
       </Modal>
+
+      <Modal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        title="Mark Invoice as Paid"
+      >
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="paymentDate">Payment Date</Label>
+            <Input
+              id="paymentDate"
+              type="date"
+              value={paymentDate}
+              onChange={(e) => setPaymentDate(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowPaymentModal(false)}
+              disabled={updatingStatus}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handlePaymentSubmit}
+              disabled={!paymentDate || updatingStatus}
+              loading={updatingStatus}
+            >
+              Mark as Paid
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
-  );
 };
 
 export default InvoiceTable;

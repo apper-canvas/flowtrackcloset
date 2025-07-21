@@ -55,6 +55,16 @@ create: async (invoiceData) => {
       const deleted = invoices.splice(index, 1)[0];
       return { ...deleted };
     }
+return null;
+  },
+
+  updateStatus: async (id, statusData) => {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const index = invoices.findIndex(i => i.Id === parseInt(id));
+    if (index !== -1) {
+      invoices[index] = { ...invoices[index], ...statusData };
+      return { ...invoices[index] };
+    }
     return null;
   }
 };
