@@ -1,8 +1,8 @@
-import React from "react";
-import KanbanBoard from "@/components/organisms/TaskList";
+import React from 'react'
+import TaskList from '@/components/organisms/TaskList'
 
-const Tasks = () => {
-  return <KanbanBoard />;
-};
+function Tasks() {
+  return <TaskList />
+}
 
-export default Tasks;
+export default Tasks
