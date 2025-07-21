@@ -79,9 +79,17 @@ const handleStatusUpdate = async (invoiceId, newStatus, paymentDate = null) => {
       
       const updatedInvoice = await invoiceService.updateStatus(invoiceId, updateData);
       if (updatedInvoice) {
-        setInvoices(prev => prev.map(invoice => 
-          invoice.Id === invoiceId ? { ...invoice, ...updatedInvoice } : invoice
-        ));
+        setInvoices(prev => prev.map(invoice => {
+          if (invoice.Id === invoiceId) {
+            const updated = { ...invoice };
+            updated.status_c = newStatus;
+            if (paymentDate) {
+              updated.paymentDate_c = paymentDate;
+            }
+            return updated;
+          }
+          return invoice;
+        }));
         toast.success(`Invoice marked as ${newStatus.toLowerCase()}`);
       }
     } catch (err) {
