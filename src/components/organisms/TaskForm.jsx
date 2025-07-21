@@ -163,26 +163,24 @@ status: task.status_c || "Pending"
           {errors.dueDate && (
             <p className="text-sm text-red-600 mt-1">{errors.dueDate}</p>
           )}
-        </div>
+</div>
       </div>
 
-      {task && (
-        <div>
-<Label htmlFor="status">
-            Status
-          </Label>
-          <select
-            id="status"
-            value={formData.status}
-            onChange={(e) => handleChange("status", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-surface-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-        </div>
-      )}
+      <div>
+        <Label htmlFor="status">
+          Status
+        </Label>
+        <select
+          id="status"
+          value={formData.status}
+          onChange={(e) => handleChange("status", e.target.value)}
+          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-surface-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
 
       <div className="flex justify-end gap-3 pt-4">
         <Button
