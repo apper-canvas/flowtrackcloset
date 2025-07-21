@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import { toast } from 'react-toastify'
 import Card from '@/components/atoms/Card'
 import Button from '@/components/atoms/Button'
