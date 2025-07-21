@@ -7,6 +7,7 @@ import Label from "@/components/atoms/Label";
 const TaskForm = ({ task, projects = [], projectId = null, onSubmit, onCancel }) => {
 const [formData, setFormData] = useState({
     title: "",
+    subtaskName: "",
     projectId: projectId || "",
     priority: "Medium",
     dueDate: format(new Date(), "yyyy-MM-dd"),
@@ -20,8 +21,9 @@ useEffect(() => {
       // Handle projectId_c as a lookup field (object with Id and Name) or direct value
       const taskProjectId = task.projectId_c?.Id || task.projectId_c || projectId || "";
       
-      setFormData({
+setFormData({
         title: task.title_c || task.Name || "",
+        subtaskName: task.subtaskName_c || "",
         projectId: taskProjectId,
         priority: task.priority_c || "Medium",
         dueDate: task.dueDate_c ? format(new Date(task.dueDate_c), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
@@ -56,7 +58,7 @@ useEffect(() => {
 
     setIsSubmitting(true);
     try {
-      const submitData = {
+const submitData = {
         ...formData,
         projectId: parseInt(formData.projectId),
         dueDate: new Date(formData.dueDate).toISOString()
@@ -93,6 +95,18 @@ useEffect(() => {
         {errors.title && (
           <p className="text-sm text-red-600 mt-1">{errors.title}</p>
         )}
+</div>
+
+      <div>
+        <Label htmlFor="subtaskName">
+          Subtask name
+        </Label>
+        <Input
+          id="subtaskName"
+          value={formData.subtaskName}
+          onChange={(e) => handleChange("subtaskName", e.target.value)}
+          placeholder="Enter subtask name (optional)"
+        />
       </div>
 
 <div>

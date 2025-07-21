@@ -11,9 +11,10 @@ export const taskService = {
   getAll: async () => {
     try {
       const params = {
-        fields: [
+fields: [
           { field: { Name: "Name" } },
           { field: { Name: "title_c" } },
+          { field: { Name: "subtaskName_c" } },
           { field: { Name: "status_c" } },
           { field: { Name: "priority_c" } },
           { field: { Name: "dueDate_c" } },
@@ -46,9 +47,10 @@ export const taskService = {
   getById: async (id) => {
     try {
       const params = {
-        fields: [
+fields: [
           { field: { Name: "Name" } },
           { field: { Name: "title_c" } },
+          { field: { Name: "subtaskName_c" } },
           { field: { Name: "status_c" } },
           { field: { Name: "priority_c" } },
           { field: { Name: "dueDate_c" } },
@@ -78,9 +80,10 @@ export const taskService = {
   getByProjectId: async (projectId) => {
     try {
       const params = {
-        fields: [
+fields: [
           { field: { Name: "Name" } },
           { field: { Name: "title_c" } },
+          { field: { Name: "subtaskName_c" } },
           { field: { Name: "status_c" } },
           { field: { Name: "priority_c" } },
           { field: { Name: "dueDate_c" } },
@@ -117,10 +120,11 @@ export const taskService = {
   create: async (taskData) => {
     try {
       const params = {
-        records: [{
+records: [{
           Name: taskData.title,
           title_c: taskData.title,
-status_c: taskData.status || "Pending",
+          subtaskName_c: taskData.subtaskName || "",
+          status_c: taskData.status || "Pending",
           priority_c: taskData.priority || "Medium",
           dueDate_c: taskData.dueDate,
           projectId_c: parseInt(taskData.projectId),
@@ -167,11 +171,12 @@ status_c: taskData.status || "Pending",
   update: async (id, taskData) => {
     try {
       const params = {
-        records: [{
+records: [{
           Id: parseInt(id),
           Name: taskData.title,
           title_c: taskData.title,
-status_c: taskData.status,
+          subtaskName_c: taskData.subtaskName || "",
+          status_c: taskData.status,
           priority_c: taskData.priority,
           dueDate_c: taskData.dueDate,
           projectId_c: parseInt(taskData.projectId),
