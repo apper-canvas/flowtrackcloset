@@ -9,9 +9,6 @@ import Button from "@/components/atoms/Button";
 function Header({ onMenuToggle, title = "Dashboard", onNewProject }) {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSelector((state) => state.user);
-function Header({ onMenuToggle, title, onNewProject }) {
-  const navigate = useNavigate();
-  const { user, isAuthenticated } = useSelector((state) => state.user);
   const { logout } = useContext(AuthContext);
 
   function UserProfile() {
