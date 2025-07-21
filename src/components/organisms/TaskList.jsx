@@ -17,9 +17,9 @@ const TaskList = ({ projectId = null }) => {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
-
+  const [viewMode, setViewMode] = useState('kanban') // 'kanban' or 'list'
   const columns = {
     'Pending': { title: 'To Do', color: 'bg-gray-100 dark:bg-gray-800' },
     'In Progress': { title: 'In Progress', color: 'bg-blue-100 dark:bg-blue-900/20' },
@@ -145,9 +145,9 @@ const handleSaveTask = async (taskData) => {
     } catch (error) {
       toast.error('Failed to delete task')
     }
-  }
+}
 
-const TaskCard = ({ task, index }) => (
+  const TaskCard = ({ task, index }) => (
     <Draggable draggableId={task.Id.toString()} index={index}>
       {(provided, snapshot) => (
         <div
@@ -210,6 +210,122 @@ const TaskCard = ({ task, index }) => (
     </Draggable>
   )
 
+  const TableTaskList = () => (
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-gray-200 dark:border-gray-700">
+            <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Task</th>
+            <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Status</th>
+            <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Priority</th>
+            <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Due Date</th>
+            <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.map((task) => (
+            <tr key={task.Id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <td className="py-4 px-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{task.title}</h3>
+                  {task.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-1">
+                      {task.description}
+                    </p>
+                  )}
+                </div>
+              </td>
+              <td className="py-4 px-4">
+                <Badge variant={task.status === 'Completed' ? 'success' : task.status === 'In Progress' ? 'info' : 'warning'}>
+                  {task.status === 'Pending' ? 'To Do' : task.status}
+                </Badge>
+              </td>
+              <td className="py-4 px-4">
+                <Badge className={getPriorityColor(task.priority)}>
+                  {task.priority}
+                </Badge>
+              </td>
+              <td className="py-4 px-4">
+                <span className="text-gray-600 dark:text-gray-400">
+                  {new Date(task.dueDate).toLocaleDateString()}
+                </span>
+              </td>
+              <td className="py-4 px-4">
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditTask(task)}
+                  >
+                    <ApperIcon name="Edit" className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteTask(task.Id)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <ApperIcon name="Trash2" className="w-4 h-4" />
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {tasks.length === 0 && (
+        <div className="text-center py-12">
+          <ApperIcon name="CheckSquare" className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">No tasks found</p>
+        </div>
+      )}
+    </div>
+  )
+
+  const KanbanView = () => (
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {Object.entries(columns).map(([columnId, column]) => {
+          const columnTasks = tasks.filter(task => task.status === columnId)
+          
+          return (
+            <div key={columnId} className="flex flex-col">
+              <div className={`${column.color} rounded-lg p-4 mb-4`}>
+                <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                    {column.title}
+                  </h3>
+                  <Badge variant="secondary" className="text-sm">
+                    {columnTasks.length}
+                  </Badge>
+                </div>
+              </div>
+              
+              <Droppable droppableId={columnId}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`flex-1 min-h-[200px] rounded-lg p-2 transition-colors ${
+                      snapshot.isDraggingOver 
+                        ? 'bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700' 
+                        : 'bg-gray-50 dark:bg-gray-900/50'
+                    }`}
+                  >
+                    {columnTasks.map((task, index) => (
+                      <TaskCard key={task.Id} task={task} index={index} />
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          )
+        })}
+      </div>
+    </DragDropContext>
+  )
+
   if (loading) {
     return <Loading />
   }
@@ -221,14 +337,36 @@ const TaskCard = ({ task, index }) => (
 return (
     <div className={projectId ? "" : "p-6"}>
       {!projectId && (
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Task Management
           </h1>
-          <Button onClick={handleAddTask} className="gap-2">
-            <ApperIcon name="Plus" className="w-4 h-4" />
-            Add Task
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              <Button
+                variant={viewMode === 'list' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="gap-2"
+              >
+                <ApperIcon name="List" className="w-4 h-4" />
+                List
+              </Button>
+              <Button
+                variant={viewMode === 'kanban' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('kanban')}
+                className="gap-2"
+              >
+                <ApperIcon name="Kanban" className="w-4 h-4" />
+                Kanban
+              </Button>
+            </div>
+            <Button onClick={handleAddTask} className="gap-2">
+              <ApperIcon name="Plus" className="w-4 h-4" />
+              Add Task
+            </Button>
+          </div>
         </div>
       )}
 
@@ -244,47 +382,14 @@ return (
         </div>
       )}
 
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {Object.entries(columns).map(([columnId, column]) => {
-            const columnTasks = tasks.filter(task => task.status === columnId)
-            
-            return (
-              <div key={columnId} className="flex flex-col">
-                <div className={`${column.color} rounded-lg p-4 mb-4`}>
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-                      {column.title}
-                    </h3>
-                    <Badge variant="secondary" className="text-sm">
-                      {columnTasks.length}
-                    </Badge>
-                  </div>
-                </div>
-                
-                <Droppable droppableId={columnId}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`flex-1 min-h-[200px] rounded-lg p-2 transition-colors ${
-                        snapshot.isDraggingOver 
-                          ? 'bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700' 
-                          : 'bg-gray-50 dark:bg-gray-900/50'
-                      }`}
-                    >
-                      {columnTasks.map((task, index) => (
-                        <TaskCard key={task.Id} task={task} index={index} />
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            )
-          })}
-        </div>
-      </DragDropContext>
+      {/* Render based on view mode for main tasks page, always kanban for project */}
+      {!projectId && viewMode === 'list' ? (
+        <Card className="p-6">
+          <TableTaskList />
+        </Card>
+      ) : (
+        <KanbanView />
+      )}
 
       <Modal
         isOpen={isModalOpen}

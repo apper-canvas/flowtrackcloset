@@ -177,7 +177,7 @@ const TaskForm = ({ task, projects = [], projectId = null, onSubmit, onCancel })
             onChange={(e) => handleChange("status", e.target.value)}
             className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-surface-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="Pending">To Do</option>
+<option value="Pending">To Do</option>
             <option value="In Progress">In Progress</option>
             <option value="Review">Review</option>
             <option value="Completed">Done</option>
