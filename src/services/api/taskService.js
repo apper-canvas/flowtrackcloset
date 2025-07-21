@@ -120,7 +120,7 @@ export const taskService = {
         records: [{
           Name: taskData.title,
           title_c: taskData.title,
-          status_c: taskData.status || "Pending",
+status_c: taskData.status || "Pending",
           priority_c: taskData.priority || "Medium",
           dueDate_c: taskData.dueDate,
           projectId_c: parseInt(taskData.projectId),
@@ -171,7 +171,7 @@ export const taskService = {
           Id: parseInt(id),
           Name: taskData.title,
           title_c: taskData.title,
-          status_c: taskData.status,
+status_c: taskData.status,
           priority_c: taskData.priority,
           dueDate_c: taskData.dueDate,
           projectId_c: parseInt(taskData.projectId),
@@ -220,7 +220,7 @@ export const taskService = {
       const params = {
         records: [{
           Id: parseInt(id),
-          status_c: status
+status_c: status
         }]
       };
       

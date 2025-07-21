@@ -24,7 +24,7 @@ useEffect(() => {
         projectId: task.projectId_c?.Id || task.projectId_c || projectId || "",
         priority: task.priority_c || "Medium",
         dueDate: task.dueDate_c ? format(new Date(task.dueDate_c), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-        status: task.status_c || "Pending"
+status: task.status_c || "Pending"
       });
     }
   }, [task, projectId]);
