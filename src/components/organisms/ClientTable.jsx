@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Modal from "@/components/atoms/Modal";
 import ClientForm from "@/components/molecules/ClientForm";
 import ApperIcon from "@/components/ApperIcon";
@@ -23,6 +24,8 @@ const ClientTable = () => {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
     loadData();
@@ -47,9 +50,32 @@ const ClientTable = () => {
     }
 };
 
-  const handleAddClient = (newClient) => {
+const handleAddClient = (newClient) => {
     setClients(prev => [...prev, newClient]);
     setShowAddModal(false);
+  };
+
+  const handleEditClient = (client) => {
+    setEditingClient(client);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateClient = (updatedClient) => {
+    setClients(prev => prev.map(c => c.Id === updatedClient.Id ? updatedClient : c));
+    setShowEditModal(false);
+    setEditingClient(null);
+  };
+
+  const handleDeleteClient = async (clientId) => {
+    if (window.confirm("Are you sure you want to delete this client? This action cannot be undone.")) {
+      try {
+        await clientService.delete(clientId);
+        setClients(prev => prev.filter(c => c.Id !== clientId));
+        toast.success("Client deleted successfully!");
+      } catch (error) {
+        toast.error("Failed to delete client. Please try again.");
+      }
+    }
   };
 
   const getClientProjectCount = (clientId) => {
@@ -170,13 +196,22 @@ onAction={() => setShowAddModal(true)}
                       <button 
                         onClick={() => navigate(`/clients/${client.Id}`)}
                         className="text-primary-600 hover:text-primary-700 p-1 rounded"
+                        title="View Details"
                       >
                         <ApperIcon name="Eye" className="w-4 h-4" />
                       </button>
-                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded">
+                      <button 
+                        onClick={() => handleEditClient(client)}
+                        className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded"
+                        title="Edit Client"
+                      >
                         <ApperIcon name="Edit" className="w-4 h-4" />
                       </button>
-                      <button className="text-red-600 hover:text-red-700 p-1 rounded">
+                      <button 
+                        onClick={() => handleDeleteClient(client.Id)}
+                        className="text-red-600 hover:text-red-700 p-1 rounded"
+                        title="Delete Client"
+                      >
                         <ApperIcon name="Trash2" className="w-4 h-4" />
                       </button>
                     </div>
@@ -197,7 +232,7 @@ onAction={() => setShowAddModal(true)}
         />
       )}
 
-      <Modal
+<Modal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         title="Add New Client"
@@ -206,6 +241,25 @@ onAction={() => setShowAddModal(true)}
         <ClientForm
           onSubmit={handleAddClient}
           onCancel={() => setShowAddModal(false)}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingClient(null);
+        }}
+        title="Edit Client"
+        className="max-w-lg"
+      >
+        <ClientForm
+          client={editingClient}
+          onSubmit={handleUpdateClient}
+          onCancel={() => {
+            setShowEditModal(false);
+            setEditingClient(null);
+          }}
         />
       </Modal>
     </div>

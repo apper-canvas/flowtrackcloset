@@ -5,11 +5,11 @@ import Input from "@/components/atoms/Input";
 import Label from "@/components/atoms/Label";
 import Button from "@/components/atoms/Button";
 
-const InvoiceForm = ({ projects, onSubmit, onCancel, loading }) => {
+const InvoiceForm = ({ invoice, projects, onSubmit, onCancel, loading }) => {
   const [formData, setFormData] = useState({
-    projectId: "",
-    dueDate: "",
-    lineItems: [{ description: "", amount: "" }]
+    projectId: invoice?.projectId || "",
+    dueDate: invoice?.dueDate ? invoice.dueDate.split('T')[0] : "",
+    lineItems: invoice?.lineItems || [{ description: "", amount: "" }]
   });
   const [errors, setErrors] = useState({});
 
@@ -235,12 +235,15 @@ const InvoiceForm = ({ projects, onSubmit, onCancel, loading }) => {
         >
           Cancel
         </Button>
-        <Button
+<Button
           type="submit"
           className="flex-1"
           disabled={loading}
         >
-          {loading ? "Creating..." : "Create Invoice"}
+          {loading 
+            ? (invoice ? "Updating..." : "Creating...") 
+            : (invoice ? "Update Invoice" : "Create Invoice")
+          }
         </Button>
       </div>
     </form>

@@ -1,5 +1,4 @@
 import invoicesData from "@/services/mockData/invoices.json";
-
 let invoices = [...invoicesData];
 
 export const invoiceService = {
@@ -38,7 +37,7 @@ create: async (invoiceData) => {
     return { ...newInvoice };
   },
 
-  update: async (id, invoiceData) => {
+update: async (id, invoiceData) => {
     await new Promise(resolve => setTimeout(resolve, 400));
     const index = invoices.findIndex(i => i.Id === parseInt(id));
     if (index !== -1) {
@@ -55,7 +54,7 @@ create: async (invoiceData) => {
       const deleted = invoices.splice(index, 1)[0];
       return { ...deleted };
     }
-return null;
+    return null;
   },
 
   updateStatus: async (id, statusData) => {

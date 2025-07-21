@@ -58,13 +58,15 @@ const getPageTitle = (pathname) => {
         
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
 <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/clients" element={<Clients />} />
-            <Route path="/clients/:id" element={<ClientDetail />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:id" element={<ProjectDetail />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/invoices" element={<Invoices />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/clients" element={<Clients />} />
+          <Route path="/clients/:id" element={<ClientDetail />} />
+          <Route path="/clients/:id/edit" element={<ClientDetail />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/projects/:id" element={<ProjectDetail />} />
+          <Route path="/projects/:id/edit" element={<ProjectDetail />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/invoices" element={<Invoices />} />
           </Routes>
         </main>
       </div>

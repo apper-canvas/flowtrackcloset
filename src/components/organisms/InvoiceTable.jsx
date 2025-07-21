@@ -25,6 +25,8 @@ const InvoiceTable = () => {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState(null);
   const [creating, setCreating] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
@@ -105,6 +107,43 @@ const InvoiceTable = () => {
       setSelectedInvoiceId(null);
       setPaymentDate("");
     }
+};
+
+  const handleViewInvoice = (invoice) => {
+    toast.info("Invoice view functionality will be implemented in a future update.");
+  };
+
+  const handleEditInvoice = (invoice) => {
+    setEditingInvoice(invoice);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateInvoice = async (invoiceData) => {
+    try {
+      const updatedInvoice = await invoiceService.update(editingInvoice.Id, invoiceData);
+      setInvoices(prev => prev.map(inv => inv.Id === editingInvoice.Id ? updatedInvoice : inv));
+      setShowEditModal(false);
+      setEditingInvoice(null);
+      toast.success("Invoice updated successfully");
+    } catch (err) {
+      toast.error("Failed to update invoice. Please try again.");
+    }
+  };
+
+  const handleDownloadInvoice = (invoice) => {
+    toast.info("Invoice download functionality will be implemented in a future update.");
+  };
+
+  const handleDeleteInvoice = async (invoiceId) => {
+    if (window.confirm("Are you sure you want to delete this invoice? This action cannot be undone.")) {
+      try {
+        await invoiceService.delete(invoiceId);
+        setInvoices(prev => prev.filter(inv => inv.Id !== invoiceId));
+        toast.success("Invoice deleted successfully");
+      } catch (err) {
+        toast.error("Failed to delete invoice. Please try again.");
+      }
+    }
   };
 
   const calculateOutstandingAmount = () => {
@@ -131,7 +170,6 @@ const InvoiceTable = () => {
         return "secondary";
     }
   };
-
   const filteredInvoices = invoices.filter(invoice =>
     invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
     getProjectName(invoice.projectId).toLowerCase().includes(searchTerm.toLowerCase())
@@ -252,10 +290,18 @@ if (error) {
                   </td>
 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <button className="text-primary-600 hover:text-primary-700 p-1 rounded">
+                      <button 
+                        onClick={() => handleViewInvoice(invoice)}
+                        className="text-primary-600 hover:text-primary-700 p-1 rounded"
+                        title="View Invoice"
+                      >
                         <ApperIcon name="Eye" className="w-4 h-4" />
                       </button>
-                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded">
+                      <button 
+                        onClick={() => handleEditInvoice(invoice)}
+                        className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 p-1 rounded"
+                        title="Edit Invoice"
+                      >
                         <ApperIcon name="Edit" className="w-4 h-4" />
                       </button>
                       {invoice.status === "Draft" && (
@@ -278,10 +324,18 @@ if (error) {
                           <ApperIcon name="DollarSign" className="w-4 h-4" />
                         </button>
                       )}
-                      <button className="text-green-600 hover:text-green-700 p-1 rounded">
+                      <button 
+                        onClick={() => handleDownloadInvoice(invoice)}
+                        className="text-green-600 hover:text-green-700 p-1 rounded"
+                        title="Download Invoice"
+                      >
                         <ApperIcon name="Download" className="w-4 h-4" />
                       </button>
-                      <button className="text-red-600 hover:text-red-700 p-1 rounded">
+                      <button 
+                        onClick={() => handleDeleteInvoice(invoice.Id)}
+                        className="text-red-600 hover:text-red-700 p-1 rounded"
+                        title="Delete Invoice"
+                      >
                         <ApperIcon name="Trash2" className="w-4 h-4" />
                       </button>
                     </div>
@@ -348,6 +402,25 @@ loading={creating}
           </div>
         </div>
 </Modal>
+
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingInvoice(null);
+        }}
+        title="Edit Invoice"
+      >
+        <InvoiceForm
+          invoice={editingInvoice}
+          projects={projects}
+          onSubmit={handleUpdateInvoice}
+          onCancel={() => {
+            setShowEditModal(false);
+            setEditingInvoice(null);
+          }}
+        />
+      </Modal>
     </div>
   );
 };
