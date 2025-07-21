@@ -1,9 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import ApperIcon from "@/components/ApperIcon";
 import ThemeToggle from "@/components/molecules/ThemeToggle";
 import Button from "@/components/atoms/Button";
 
 const Header = ({ onMenuToggle, title = "Dashboard" }) => {
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-30 glass dark:glass-dark border-b border-gray-200 dark:border-gray-700">
       <div className="px-4 sm:px-6 lg:px-8">
@@ -31,9 +33,18 @@ const Header = ({ onMenuToggle, title = "Dashboard" }) => {
               </h1>
             </div>
           </div>
-          
-          <div className="flex items-center space-x-4">
+<div className="flex items-center space-x-4">
             <ThemeToggle />
+            
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => navigate('/projects')}
+              className="hidden sm:flex items-center space-x-2"
+            >
+              <ApperIcon name="Plus" className="w-4 h-4" />
+              <span>New Project</span>
+            </Button>
             
             <div className="hidden sm:flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center">

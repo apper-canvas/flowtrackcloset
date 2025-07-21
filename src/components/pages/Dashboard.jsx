@@ -1,38 +1,40 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import ApperIcon from "@/components/ApperIcon";
 import Card from "@/components/atoms/Card";
 import DashboardStats from "@/components/organisms/DashboardStats";
 
 const Dashboard = () => {
-  const quickActions = [
+  const navigate = useNavigate();
+const quickActions = [
     {
       title: "New Client",
       description: "Add a new client to your portfolio",
       icon: "UserPlus",
       color: "primary",
-      action: () => console.log("Add client")
+      action: () => navigate("/clients")
     },
     {
       title: "Create Project",
       description: "Start a new project for existing clients",
       icon: "FolderPlus",
       color: "info",
-      action: () => console.log("Create project")
+      action: () => navigate("/projects")
     },
     {
       title: "Add Task",
       description: "Break down projects into manageable tasks",
       icon: "Plus",
       color: "warning",
-      action: () => console.log("Add task")
+      action: () => navigate("/tasks")
     },
     {
       title: "Generate Invoice",
       description: "Bill clients for completed work",
       icon: "FileText",
       color: "success",
-      action: () => console.log("Generate invoice")
+      action: () => navigate("/invoices")
     }
   ];
 
