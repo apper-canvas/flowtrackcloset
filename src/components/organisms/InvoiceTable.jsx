@@ -17,6 +17,7 @@ import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import { invoiceService } from "@/services/api/invoiceService";
 import { projectService } from "@/services/api/projectService";
+
 const InvoiceTable = () => {
   const [invoices, setInvoices] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -140,11 +141,11 @@ const InvoiceTable = () => {
     return <Loading />;
   }
 
-  if (error) {
+if (error) {
     return <Error message={error} onRetry={loadData} />;
   }
 
-if (invoices.length === 0) {
+  if (invoices.length === 0) {
     return (
       <Empty 
         title="No invoices yet"
@@ -154,7 +155,8 @@ if (invoices.length === 0) {
       />
     );
   }
-return (
+
+  return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -345,8 +347,9 @@ loading={creating}
             </Button>
           </div>
         </div>
-      </Modal>
+</Modal>
     </div>
+  );
 };
 
 export default InvoiceTable;
