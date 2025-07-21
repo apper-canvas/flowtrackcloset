@@ -1,0 +1,42 @@
+[
+  {
+    "Id": 1,
+    "projectId": 3,
+    "invoiceNumber": "INV-2024-001",
+    "amount": 8500,
+    "status": "Paid",
+    "dueDate": "2024-03-15T00:00:00Z"
+  },
+  {
+    "Id": 2,
+    "projectId": 1,
+    "invoiceNumber": "INV-2024-002",
+    "amount": 12500,
+    "status": "Sent",
+    "dueDate": "2024-04-01T00:00:00Z"
+  },
+  {
+    "Id": 3,
+    "projectId": 4,
+    "invoiceNumber": "INV-2024-003",
+    "amount": 6000,
+    "status": "Draft",
+    "dueDate": "2024-04-15T00:00:00Z"
+  },
+  {
+    "Id": 4,
+    "projectId": 5,
+    "invoiceNumber": "INV-2024-004",
+    "amount": 9000,
+    "status": "Overdue",
+    "dueDate": "2024-03-25T00:00:00Z"
+  },
+  {
+    "Id": 5,
+    "projectId": 2,
+    "invoiceNumber": "INV-2024-005",
+    "amount": 15000,
+    "status": "Draft",
+    "dueDate": "2024-05-01T00:00:00Z"
+  }
+]

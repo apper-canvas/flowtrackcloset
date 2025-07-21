@@ -1,0 +1,56 @@
+[
+  {
+    "Id": 1,
+    "clientId": 1,
+    "name": "E-commerce Platform Redesign",
+    "status": "In Progress",
+    "startDate": "2024-01-20T00:00:00Z",
+    "endDate": "2024-04-15T00:00:00Z",
+    "budget": 25000
+  },
+  {
+    "Id": 2,
+    "clientId": 1,
+    "name": "Mobile App Development",
+    "status": "Planning",
+    "startDate": "2024-04-01T00:00:00Z",
+    "endDate": "2024-07-30T00:00:00Z",
+    "budget": 45000
+  },
+  {
+    "Id": 3,
+    "clientId": 2,
+    "name": "Brand Identity Package",
+    "status": "Completed",
+    "startDate": "2024-02-05T00:00:00Z",
+    "endDate": "2024-03-05T00:00:00Z",
+    "budget": 8500
+  },
+  {
+    "Id": 4,
+    "clientId": 3,
+    "name": "Website Optimization",
+    "status": "In Progress",
+    "startDate": "2024-02-25T00:00:00Z",
+    "endDate": "2024-04-25T00:00:00Z",
+    "budget": 12000
+  },
+  {
+    "Id": 5,
+    "clientId": 4,
+    "name": "Digital Marketing Strategy",
+    "status": "In Progress",
+    "startDate": "2024-03-10T00:00:00Z",
+    "endDate": "2024-06-10T00:00:00Z",
+    "budget": 18000
+  },
+  {
+    "Id": 6,
+    "clientId": 5,
+    "name": "Healthcare Portal Development",
+    "status": "Planning",
+    "startDate": "2024-03-15T00:00:00Z",
+    "endDate": "2024-08-15T00:00:00Z",
+    "budget": 35000
+  }
+]
