@@ -19,14 +19,16 @@ export const recentActivityService = {
           { field: { Name: "client_c" } },
           { field: { Name: "project_c" } },
           { field: { Name: "task_c" } },
-          { field: { Name: "invoice_c" } },
-          { field: { Name: "Tags" } }
+          { field: { Name: "invoice_c" } }
         ],
         orderBy: [
-          { fieldName: "timestamp_c", sorttype: "DESC" }
+          {
+            fieldName: "timestamp_c",
+            sorttype: "DESC"
+          }
         ],
         pagingInfo: {
-          limit: 10,
+          limit: 50,
           offset: 0
         }
       };
@@ -34,8 +36,8 @@ export const recentActivityService = {
       const response = await apperClient.fetchRecords(tableName, params);
       
       if (!response.success) {
-        console.error("Error fetching recent activities:", response.message);
-        throw new Error(response.message);
+        console.error(response.message);
+        return [];
       }
       
       return response.data || [];
@@ -43,13 +45,13 @@ export const recentActivityService = {
       if (error?.response?.data?.message) {
         console.error("Error fetching recent activities:", error?.response?.data?.message);
       } else {
-        console.error("Error fetching recent activities:", error.message);
+        console.error(error.message);
       }
-      throw error;
+      return [];
     }
   },
 
-  getById: async (id) => {
+  getById: async (recordId) => {
     try {
       const params = {
         fields: [
@@ -60,50 +62,38 @@ export const recentActivityService = {
           { field: { Name: "client_c" } },
           { field: { Name: "project_c" } },
           { field: { Name: "task_c" } },
-          { field: { Name: "invoice_c" } },
-          { field: { Name: "Tags" } }
+          { field: { Name: "invoice_c" } }
         ]
       };
       
-      const response = await apperClient.getRecordById(tableName, parseInt(id), params);
+      const response = await apperClient.getRecordById(tableName, recordId, params);
       
-      if (!response.success) {
-        console.error(`Error fetching activity with ID ${id}:`, response.message);
+      if (!response || !response.data) {
         return null;
       }
       
       return response.data;
     } catch (error) {
       if (error?.response?.data?.message) {
-        console.error(`Error fetching activity with ID ${id}:`, error?.response?.data?.message);
+        console.error(`Error fetching recent activity with ID ${recordId}:`, error?.response?.data?.message);
       } else {
-        console.error(`Error fetching activity with ID ${id}:`, error.message);
+        console.error(error.message);
       }
       return null;
     }
   },
 
-  create: async (activityData) => {
+  create: async (records) => {
     try {
       const params = {
-        records: [{
-          Name: activityData.name || `Activity-${Date.now()}`,
-          activityType_c: activityData.activityType,
-          userId_c: parseInt(activityData.userId),
-          timestamp_c: activityData.timestamp || new Date().toISOString(),
-          client_c: activityData.clientId ? parseInt(activityData.clientId) : null,
-          project_c: activityData.projectId ? parseInt(activityData.projectId) : null,
-          task_c: activityData.taskId ? parseInt(activityData.taskId) : null,
-          invoice_c: activityData.invoiceId ? parseInt(activityData.invoiceId) : null,
-          Tags: activityData.tags || ""
-        }]
+        records: Array.isArray(records) ? records : [records]
       };
       
       const response = await apperClient.createRecord(tableName, params);
       
       if (!response.success) {
-        console.error("Error creating activity:", response.message);
-        throw new Error(response.message);
+        console.error(response.message);
+        return [];
       }
       
       if (response.results) {
@@ -111,51 +101,34 @@ export const recentActivityService = {
         const failedRecords = response.results.filter(result => !result.success);
         
         if (failedRecords.length > 0) {
-          console.error(`Failed to create activity ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
-          
-          failedRecords.forEach(record => {
-            record.errors?.forEach(error => {
-              console.error(`${error.fieldLabel}: ${error.message}`);
-            });
-            if (record.message) console.error(record.message);
-          });
+          console.error(`Failed to create ${failedRecords.length} recent activity records:${JSON.stringify(failedRecords)}`);
         }
         
-        return successfulRecords.length > 0 ? successfulRecords[0].data : null;
+        return successfulRecords.map(result => result.data);
       }
       
-      return null;
+      return [];
     } catch (error) {
       if (error?.response?.data?.message) {
-        console.error("Error creating activity:", error?.response?.data?.message);
+        console.error("Error creating recent activity records:", error?.response?.data?.message);
       } else {
-        console.error("Error creating activity:", error.message);
+        console.error(error.message);
       }
-      throw error;
+      return [];
     }
   },
 
-  update: async (id, activityData) => {
+  update: async (records) => {
     try {
       const params = {
-        records: [{
-          Id: parseInt(id),
-          activityType_c: activityData.activityType,
-          userId_c: parseInt(activityData.userId),
-          timestamp_c: activityData.timestamp,
-          client_c: activityData.clientId ? parseInt(activityData.clientId) : null,
-          project_c: activityData.projectId ? parseInt(activityData.projectId) : null,
-          task_c: activityData.taskId ? parseInt(activityData.taskId) : null,
-          invoice_c: activityData.invoiceId ? parseInt(activityData.invoiceId) : null,
-          Tags: activityData.tags || ""
-        }]
+        records: Array.isArray(records) ? records : [records]
       };
       
       const response = await apperClient.updateRecord(tableName, params);
       
       if (!response.success) {
-        console.error("Error updating activity:", response.message);
-        throw new Error(response.message);
+        console.error(response.message);
+        return [];
       }
       
       if (response.results) {
@@ -163,41 +136,34 @@ export const recentActivityService = {
         const failedUpdates = response.results.filter(result => !result.success);
         
         if (failedUpdates.length > 0) {
-          console.error(`Failed to update activity ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
-          
-          failedUpdates.forEach(record => {
-            record.errors?.forEach(error => {
-              console.error(`${error.fieldLabel}: ${error.message}`);
-            });
-            if (record.message) console.error(record.message);
-          });
+          console.error(`Failed to update ${failedUpdates.length} recent activity records:${JSON.stringify(failedUpdates)}`);
         }
         
-        return successfulUpdates.length > 0 ? successfulUpdates[0].data : null;
+        return successfulUpdates.map(result => result.data);
       }
       
-      return null;
+      return [];
     } catch (error) {
       if (error?.response?.data?.message) {
-        console.error("Error updating activity:", error?.response?.data?.message);
+        console.error("Error updating recent activity records:", error?.response?.data?.message);
       } else {
-        console.error("Error updating activity:", error.message);
+        console.error(error.message);
       }
-      throw error;
+      return [];
     }
   },
 
-  delete: async (id) => {
+  delete: async (recordIds) => {
     try {
       const params = {
-        RecordIds: [parseInt(id)]
+        RecordIds: Array.isArray(recordIds) ? recordIds : [recordIds]
       };
       
       const response = await apperClient.deleteRecord(tableName, params);
       
       if (!response.success) {
-        console.error("Error deleting activity:", response.message);
-        throw new Error(response.message);
+        console.error(response.message);
+        return false;
       }
       
       if (response.results) {
@@ -205,24 +171,20 @@ export const recentActivityService = {
         const failedDeletions = response.results.filter(result => !result.success);
         
         if (failedDeletions.length > 0) {
-          console.error(`Failed to delete activity ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
-          
-          failedDeletions.forEach(record => {
-            if (record.message) console.error(record.message);
-          });
+          console.error(`Failed to delete ${failedDeletions.length} recent activity records:${JSON.stringify(failedDeletions)}`);
         }
         
-        return successfulDeletions.length > 0;
+        return successfulDeletions.length === params.RecordIds.length;
       }
       
       return false;
     } catch (error) {
       if (error?.response?.data?.message) {
-        console.error("Error deleting activity:", error?.response?.data?.message);
+        console.error("Error deleting recent activity records:", error?.response?.data?.message);
       } else {
-        console.error("Error deleting activity:", error.message);
+        console.error(error.message);
       }
-      throw error;
+return false;
     }
   }
 };
