@@ -20,7 +20,7 @@ useEffect(() => {
     if (task) {
       setFormData({
         title: task.title_c || task.Name || "",
-        description: task.description_c || task.description || "",
+        description: task.description_c || "",
         projectId: task.projectId_c?.Id || task.projectId_c || projectId || "",
         priority: task.priority_c || "Medium",
         dueDate: task.dueDate_c ? format(new Date(task.dueDate_c), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
