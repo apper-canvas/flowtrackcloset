@@ -8,7 +8,6 @@ import Button from "@/components/atoms/Button";
 const InvoiceForm = ({ invoice, projects, onSubmit, onCancel, loading }) => {
 const [formData, setFormData] = useState({
     projectId: invoice?.projectId_c?.Id || invoice?.projectId_c || "",
-    invoiceTitle: invoice?.invoiceTitle_c || "",
     status: invoice?.status_c || "Draft",
     dueDate: invoice?.dueDate_c ? invoice.dueDate_c.split('T')[0] : "",
     lineItems: invoice?.lineItems || [{ description: "", amount: "" }]
@@ -94,7 +93,6 @@ const [formData, setFormData] = useState({
 
 const submitData = {
       projectId: parseInt(formData.projectId),
-      invoiceTitle: formData.invoiceTitle.trim(),
       status: formData.status,
       dueDate: formData.dueDate,
       amount: totalAmount,
@@ -135,18 +133,6 @@ const submitData = {
             <p className="mt-1 text-sm text-red-600">{errors.projectId}</p>
           )}
 </div>
-
-        <div>
-          <Label htmlFor="invoiceTitle">Invoice Title</Label>
-          <Input
-            id="invoiceTitle"
-            type="text"
-            placeholder="Enter invoice title (optional)"
-            value={formData.invoiceTitle}
-            onChange={(e) => handleInputChange("invoiceTitle", e.target.value)}
-          />
-        </div>
-
         <div>
           <Label htmlFor="status">Status *</Label>
           <select
