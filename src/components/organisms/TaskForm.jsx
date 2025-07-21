@@ -5,9 +5,8 @@ import Input from "@/components/atoms/Input";
 import Label from "@/components/atoms/Label";
 
 const TaskForm = ({ task, projects = [], projectId = null, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     title: "",
-    description: "",
     projectId: projectId || "",
     priority: "Medium",
     dueDate: format(new Date(), "yyyy-MM-dd"),
@@ -18,10 +17,12 @@ const TaskForm = ({ task, projects = [], projectId = null, onSubmit, onCancel })
 
 useEffect(() => {
     if (task) {
+      // Handle projectId_c as a lookup field (object with Id and Name) or direct value
+      const taskProjectId = task.projectId_c?.Id || task.projectId_c || projectId || "";
+      
       setFormData({
         title: task.title_c || task.Name || "",
-        description: task.description_c || "",
-        projectId: task.projectId_c?.Id || task.projectId_c || projectId || "",
+        projectId: taskProjectId,
         priority: task.priority_c || "Medium",
         dueDate: task.dueDate_c ? format(new Date(task.dueDate_c), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
         status: task.status_c || "Pending"
@@ -94,21 +95,8 @@ useEffect(() => {
         )}
       </div>
 
-      <div>
-        <Label htmlFor="description">
-          Description
-        </Label>
-        <textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => handleChange("description", e.target.value)}
-          placeholder="Enter task description (optional)"
-          rows={3}
-          className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-600 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500 resize-none"
-        />
-      </div>
-
 <div>
+
         <Label htmlFor="projectId" required>
           Project
         </Label>
